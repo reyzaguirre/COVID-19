@@ -1,0 +1,26 @@
+---
+title: "Mi Nota"
+author: "Raul Eyzaguirre"
+date: "November 24, 2015"
+output: html_document
+---
+
+La función `minota` está disponible en el paquete `rhep`. Para instalar y cargar el paquete debe escribir lo siguiente en R:
+
+```{r}
+install.packages("devtools")
+devtools::install_github("reyzaguirre/rhep")
+library(rhep)
+```
+
+Listo, ya puede usar la función. Por ejemplo, para hacer el pronóstico en EP2, de alguien que está llevando el curso por primera vez, con ciertas notas para pa1, pa2, pi1 y ep, debe escribir:
+
+```{r}
+minota(curso = 2, vez = 1, pa1 = 12, pa2 = 16, pi1 = 15, ep = 10)
+```
+
+Para obtener ayuda sobre la función escriba:
+
+```{r}
+?minota
+```
