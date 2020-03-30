@@ -33,4 +33,4 @@ foo <- function(dr, ir, xx) {
        number_deaths = nd)
 }
 
-foo(.005, .15, 18)
+foo(.01, .15, 18)
