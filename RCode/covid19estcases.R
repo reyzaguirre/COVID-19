@@ -33,4 +33,6 @@ foo <- function(dr, ir, xx) {
        number_deaths = nd)
 }
 
+# Peru estimation
+
 foo(.01, .15, 18)
