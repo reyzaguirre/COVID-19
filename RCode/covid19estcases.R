@@ -4,13 +4,14 @@
 
 # dr: Death rate
 # ir: Infection rate
+# tl: Time lapse for recovery or death in days
 # xx: Target number of deaths for prediction
 # nd: Number of deaths
 # ni: Number of infected at time i
 # nt: Total number of infected
 # ti: Time i (days)
 
-foo <- function(dr, ir, xx) {
+foo <- function(dr, ir, tl, xx) {
   
   ni <- 1
   ti <- 1
@@ -19,20 +20,21 @@ foo <- function(dr, ir, xx) {
 
   while (nd < xx) {
     ti <- ti + 1
-    nt <- sum(ni[max(0, ti - 20):(ti - 1)])
+    nt <- sum(ni[max(0, ti - tl):(ti - 1)])
     ni <- c(ni, nt * ir)
     
-    if (ti > 19) {
-      nd <- sum(ni[1:(ti - 19)] * dr)
+    if (ti > (tl - 1)) {
+      nd <- sum(ni[1:(ti - tl + 1)] * dr)
     }
   }
   
   list(infected_total = sum(ni),
-       infected_now  = sum(ni[max(0, ti - 19):ti]),
+       infected_now  = sum(ni[max(0, ti - tl + 1):ti]),
        time = ti,
        number_deaths = nd)
 }
 
 # Peru estimation
 
-foo(.01, .15, 18)
+foo(.01, .15, 18, 500)
+
