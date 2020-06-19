@@ -1,0 +1,989 @@
+---
+title: "Seguimiento del número de fallecimientos diarios en el Perú"
+subtitle: "Datos del Sistema Informático Nacional de Defunciones, SINADEF"
+author: "Raúl Eyzaguirre"
+date: '`r format(Sys.time(), "%d/%m/%Y")`'
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = FALSE}
+
+library(ggplot2)
+library(ggrepel)
+library(st4gi)
+library(reshape)
+library(readxl)
+
+options(stringsAsFactors = FALSE)
+options(digits = 4)
+
+# Leer datos
+
+full <- data.frame(read_excel("SINADEF_DATOS_ABIERTOS_17062020.xlsx"))
+full$fecha <- as.Date(full$fecha, "%Y-%m-%d")
+full$mes <- as.numeric(full$mes)
+full$ano <- as.numeric(full$ano)
+
+# Eliminar otros paises
+
+full <- full[full$pais == "PERU", ]
+
+# Eliminar muerte violenta
+
+full.nv <- full[full$violenta == "SIN REGISTRO", ]
+
+# Diferencias 2017, 2018, 2019
+
+tt <- table(full$ano)
+dif17.19 <- (tt[3] - tt[1]) / tt[3] * 100
+dif18.19 <- (tt[3] - tt[2]) / tt[3] * 100
+
+# Identificar ultimo dia
+
+ultimo.fecha <- max(full$fecha)
+
+# Texto de meses
+
+ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10)) - 1 
+ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
+
+ultimo.mes.texto <- c("enero", "febrero", "marzo", "abril", "mayo", "junio",
+                      "julio", "agosto", "septiembre", "octubre", "noviembre",
+                      "diciembre")[ultimo.mes]
+
+# Conteo por año y provincia
+
+prov.ano <- table(full$provincia, full$ano)
+chcy <- prov.ano[rownames(prov.ano) == "CHICLAYO", ]
+ferr <- prov.ano[rownames(prov.ano) == "FERREÑAFE", ]
+lamb <- prov.ano[rownames(prov.ano) == "LAMBAYEQUE", ]
+
+```
+
+## 1. Introducción
+
+Los datos del sistema Informático Nacional de Defunciones, SINADEF, pueden descargarse desde [este enlace](http://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp) y cuentan con el registro de defunciones desde el año 2017. En la circunstancia actual, estos datos permiten evaluar el efecto de la epidemia de COVID-19 en el país. Es importante tener en cuenta que podría haber un efecto de cobertura (o falta de cobertura) en los años 2017 y 2018, en donde el número de fallecidos es un `r paste0(format(dif17.19, digits = 3), "%")` y `r paste0(format(dif18.19, digits = 3), "%")` menor que en el 2019 respectivamente. Por esta razón solo se utilizarán como referencia los datos del 2018 y el 2019.
+
+### Problemas con los datos
+
+Las provincias de Chiclayo, Ferreñafe y Lambayeque presentan una disminución considerable en el número de fallecidos con respecto al 2017. En la siguiente tabla se ve el número total de fallecidos en estas tres provincias en los años 2017, 2018 y 2019.
+
+| Provincia  | Total fallecidos 2017 | Total fallecidos 2018 | Total fallecidos 2019 |
+|:-----------|:---------------------:|:---------------------:|:---------------------:|
+| Chiclayo   | `r chcy[1]`           |`r chcy[2]`            |`r chcy[3]`            |
+| Ferreñafe  | `r ferr[1]`           |`r ferr[2]`            |`r ferr[3]`            |
+| Lambayeque | `r lamb[1]`           |`r lamb[2]`            |`r lamb[3]`            |
+
+## 2. Número total de fallecimientos por año
+
+Los siguientes gráficos permiten evaluar el efecto COVID-19; el primero en el sentido más amplio pues incluye, entre otros factores:
+
+- El incremento en el número de fallecimientos debido a COVID-19.
+- El incremento en el número de fallecimientos debido a otras enfermedades que quedan desatendidas en el contexto actual.
+- La disminución en el número de fallecimientos por causas violentas como los accidentes de tránsito.
+
+El segundo gráfico no considera el posible efecto positivo en la disminución del número de muertes violentas.
+
+```{r echo = FALSE}
+
+# Seleccionar datos hasta el ultimo dia de todos los años
+
+temp <- full[full$mes <= ultimo.mes, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Conteo por año
+
+totales <- table(temp$ano)
+
+# Grafico de barras
+
+xx <- barplot(height = totales,
+              las = 1, xlab = "Año", ylim = c(0, max(totales)*1.1),
+              main = paste("Número de fallecidos registrados total a nivel nacional
+hasta el", ultimo.dia, "de", ultimo.mes.texto))
+
+text(x = xx, y = totales, label = totales, pos = 3, cex = 0.8)
+
+```
+
+La diferencia a la fecha entre este año y el 2019 es de `r totales[4] - totales[3]` para el número total de fallecidos.
+
+```{r echo = FALSE}
+
+# Seleccionar datos hasta el ultimo dia de todos los años
+
+temp <- full.nv[full.nv$mes <= ultimo.mes, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Conteo por año
+
+totales <- table(temp$ano)
+
+# Grafico de barras
+
+xx <- barplot(height = totales,
+              las = 1, xlab = "Año", ylim = c(0, max(totales)*1.1),
+              main = paste("Número de fallecidos por causa no violenta registrados
+a nivel nacional hasta el", ultimo.dia, "de", ultimo.mes.texto))
+
+text(x = xx, y = totales, label = totales, pos = 3, cex = 0.8)
+
+```
+
+La diferencia a la fecha entre este año y el 2019 es de `r totales[4] - totales[3]` para el número de fallecidos por causa no violenta.
+
+## 3. Evolución del número de fallecidos diarios por causa no violenta en el 2020
+
+Los siguientes gráficos permiten evaluar la evolución de la epidemia a través de su efecto en el número de fallecimientos diarios por causa no violenta, a nivel nacional y en las provincias con mayor población.
+
+```{r echo = FALSE}
+
+# Solo año 2020
+
+temp <- full.nv[full.nv$ano == 2020, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+# Gráfico
+
+titulo <- "Fallecidos diarios a nivel nacional por causa no violenta"
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) +
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+# Identificar principales provincias hasta antes del 2020
+
+temp <- full[full$ano != 2020, ]
+temp <- docomp("count", "pais", "provincia", dfr = temp, method = "slow")
+temp <- temp[sort.int(temp$pais, index.return = TRUE, decreasing = TRUE)$ix, ]
+provincias <- temp$provincia
+
+# Solo año 2020
+
+temp <- full.nv[full.nv$ano == 2020, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Provincia 1
+
+i <- 1
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 2
+
+i <- 2
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 3
+
+i <- 3
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 4
+
+i <- 4
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 5
+
+i <- 5
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 6
+
+i <- 6
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 7
+
+i <- 7
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 8
+
+i <- 8
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 9
+
+i <- 9
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 10
+
+i <- 10
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 11
+
+i <- 11
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 12
+
+i <- 12
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 13
+
+i <- 13
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 14
+
+i <- 14
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 15
+
+i <- 15
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 16
+
+i <- 16
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 17
+
+i <- 17
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 18
+
+i <- 18
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 19
+
+i <- 19
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 20
+
+i <- 20
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Provincia 31
+
+i <- 31
+temp.p <- temp[temp$provincia == provincias[i], ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+titulo <- paste("Fallecidos diarios en la provincia de",
+                provincias[i], "por causa no violenta")
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = titulo) + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+```
+
+## 4. Provincias y distritos con mayor incremento de fallecidos por causa no violenta en el último mes
+
+En los siguientes gráficos se observan las 20 provincias y 40 distritos con mayor incremento de fallecimientos por causa no violenta en el último mes con respecto a la media del mismo periodo en el 2018 y 2019. Estos gráficos permiten identificar las provincias y distritos en los que la enfermedad podría haber avanzado más. Para evitar el efecto de muestras pequeñas, solo se consideran las provincias y distritos con un promedio de fallecimientos mensual mayor a 10 en la media del 2018 y 2019.
+
+```{r echo = FALSE, fig.width = 7.5, fig.height = 5}
+
+# Seleccionar ultimo mes
+
+temp <- full.nv[full.nv$mes %in% c(ultimo.mes - 1, ultimo.mes), ]
+temp <- temp[!(temp$mes == (ultimo.mes - 1) & as.numeric(substr(temp$fecha, 9, 10)) < ultimo.dia), ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Conteo diario provincia
+
+ds <- docomp("count", "pais", c("ano", "provincia"), dfr = temp, method = 'slow')
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, 2:3]
+colnames(dc)[2] <- "total20"
+temp.p <- ds[ds$ano == 2019, 2:3]
+colnames(temp.p)[2] <- "total19"
+dc <- merge(dc, temp.p)
+temp.p <- ds[ds$ano == 2018, 2:3]
+colnames(temp.p)[2] <- "total18"
+dc <- merge(dc, temp.p)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# Ratio
+
+dc$ratio <- dc$total20 / dc$media1819
+
+# Ordenar y eliminar provincias con pocos habitantes
+
+dc <- dc[dc$media1819 > 10, ]
+dc <- dc[sort.int(dc$ratio, index.return = TRUE)$ix, ]
+dc <- dc[(dim(dc)[1] - 19):dim(dc)[1], ]
+
+# Grafico provincia
+
+par(mar = c(4, 15, 2, 2) + 0.2)
+barplot(height = dc$ratio, names.arg = dc$provincia, horiz = TRUE, las = 1,
+        main = "Provincias con mayor incremento de fallecidos
+en el último mes",
+        xlab = "Cociente entre fallecidos por causa no violenta
+en 2020 y la media 2018-2019 en el último mes")
+
+```
+
+```{r echo = FALSE, fig.width = 8, fig.height = 9}
+
+# Conteo diario Distrito
+
+ds <- docomp("count", "pais", c("ano", "distrito"), "provincia", dfr = temp, method = 'slow')
+ds$distrito <- paste(ds$distrito, ds$provincia, sep = " / ")
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, 2:4]
+colnames(dc)[3] <- "total20"
+temp.p <- ds[ds$ano == 2019, 2:4]
+colnames(temp.p)[3] <- "total19"
+dc <- merge(dc, temp.p)
+temp.p <- ds[ds$ano == 2018, 2:4]
+colnames(temp.p)[3] <- "total18"
+dc <- merge(dc, temp.p)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# Ratio
+
+dc$ratio <- dc$total20 / dc$media1819
+
+# Ordenar y eliminar distritos con pocos habitantes
+
+dc <- dc[dc$media1819 > 10, ]
+dc <- dc[sort.int(dc$ratio, index.return = TRUE)$ix, ]
+dc <- dc[(dim(dc)[1] - 39):dim(dc)[1], ]
+
+# Grafico distrito
+
+par(mar = c(4, 19, 2, 2) + 0.2)
+barplot(height = dc$ratio, names.arg = dc$distrito, horiz = TRUE, las = 1,
+        main = "Distritos con mayor incremento de fallecidos
+en el último mes",
+        xlab = "Cociente entre fallecidos por causa no violenta
+en 2020 y la media 2018-2019 en el último mes")
+
+```
+
+## 5. Exceso de fallecidos con respecto a la media de los años 2018 y 2019 por cada 1000 habitantes
+
+Si evaluamos el exceso de fallecidos este año con respecto a la media de los años 2018 y 2019 y lo presentamos como número de fallecidos por mil habitantes, podemos tener un indicador del avance de la enfermedad en el país y por provincia. En los gráficos de la sección 3 se puede identificar a ciertas provincias que ya habrían pasado por el pico para el número de fallecidos diarios, luego, el valor para el número de fallecidos por mil habitantes para estas provincias podría servir como un referente en relación con el pico de la enfermedad.
+
+```{r echo = FALSE}
+
+# Seleccionar datos hasta el ultimo dia de todos los años
+
+temp <- full.nv[full.nv$mes <= ultimo.mes, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Conteo diario provincia y año
+
+ds <- docomp("count", "pais", c("ano", "provincia"), dfr = temp, method = 'slow')
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, 2:3]
+colnames(dc)[2] <- "total20"
+temp.p <- ds[ds$ano == 2019, 2:3]
+colnames(temp.p)[2] <- "total19"
+dc <- merge(dc, temp.p)
+temp.p <- ds[ds$ano == 2018, 2:3]
+colnames(temp.p)[2] <- "total18"
+dc <- merge(dc, temp.p)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# Diferencia
+
+dc$dif <- dc$total20 - dc$media1819
+
+#| Chiclayo         | `r dc[dc$provincia == "CHICLAYO", "dif"] / 799675 * 1000` | 
+#| Lambayeque       | `r dc[dc$provincia == "LAMBAYEQUE", "dif"] / 300170 * 1000` | 
+#| Ica              | `r dc[dc$provincia == "ICA", "dif"] / 391519 * 1000` | 
+#| Pasco            | `r dc[dc$provincia == "PASCO", "dif"] /	123015 * 1000` | 
+#| Sechura          | `r dc[dc$provincia == "SECHURA", "dif"] /	79177 * 1000` | 
+#| Requena          | `r dc[dc$provincia == "REQUENA", "dif"] /	58511 * 1000` | 
+#| Huaral           | `r dc[dc$provincia == "HUARAL", "dif"] / 183898 * 1000` | 
+#| Tambopata        | `r dc[dc$provincia == "TAMBOPATA", "dif"] / 111474 * 1000` | 
+#| San Martin       | `r dc[dc$provincia == "SAN MARTIN", "dif"] / 193095 * 1000` | 
+
+```
+
+En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto a la media del 2018 y 2019 expresado en proporción por cada mil para algunas provincias y para el total nacional. Para la población total en todos los casos se toma como referencia la población registrada en [censo del 2017](https://es.wikipedia.org/wiki/Anexo:Provincias_del_Perú).
+
+| Provincia        | Exceso de fallecidos por 1000 habitantes |
+|:-----------------|:----------------------------------------:|
+| Chincha          | `r dc[dc$provincia == "CHINCHA", "dif"] / 226113 * 1000` | 
+| Callao           | `r dc[dc$provincia == "CALLAO", "dif"] / 994494 * 1000` |
+| Coronel Portillo | `r dc[dc$provincia == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
+| Lima             | `r dc[dc$provincia == "LIMA", "dif"] / 8574974 * 1000` |
+| Tumbes           | `r dc[dc$provincia == "TUMBES", "dif"] / 154962 * 1000` |
+| Santa            | `r dc[dc$provincia == "SANTA", "dif"] / 435807 * 1000` | 
+| Casma            | `r dc[dc$provincia == "CASMA", "dif"] /	50989 * 1000` | 
+| Maynas           | `r dc[dc$provincia == "MAYNAS", "dif"] / 479866 * 1000` |
+| Huarochiri       | `r dc[dc$provincia == "HUAROCHIRI", "dif"] / 58145 * 1000` | 
+| Paita            | `r dc[dc$provincia == "PAITA", "dif"] / 129892 * 1000` | 
+| Piura            | `r dc[dc$provincia == "PIURA", "dif"] / 799321 * 1000` | 
+| Sullana          | `r dc[dc$provincia == "SULLANA", "dif"] / 311454 * 1000` | 
+| Trujillo         | `r dc[dc$provincia == "TRUJILLO", "dif"] / 970016 * 1000` | 
+| Alto Amazonas    | `r dc[dc$provincia == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
+| Total nacional   | `r (totales[4] - totales[3]) / 31237385 * 1000` |
+
+## 6. Efecto COVID-19 y altura
+
+En el siguiente gráfico se observa la relación entre el exceso en el número de fallecidos con respecto a la media del 2018 y 2019 en casos por 1000 habitantes para las provincias más pobladas y la altitud de la ciudad más poblada de la provincia. Ya se sabe que existe un importante factor protector debido a la altura. Se consideran todas las provincias con más de 250 mil habitantes con la única excepción de Chiclayo (por las razones expuestas en la sección 1 de este documento).
+
+```{r echo = FALSE, message = FALSE}
+
+prov <- c("Lima", "Arequipa", "Callao", "Trujillo", "Piura", "Huancayo", "Maynas",
+          "Cusco", "Santa", "Ica", "Coronel Portillo", "Cajamarca", "Sullana",
+          "San Román", "Tacna", "Huánuco", "Huamanga", "Cañete", "Huaura",
+          "Chincha", "Puno", "Satipo", "San Martín", "Jaen")
+exce <- c(dc[dc$provincia == "LIMA", "dif"] / 8574974 * 1000,
+          dc[dc$provincia == "AREQUIPA", "dif"] / 1080635 * 1000,
+          dc[dc$provincia == "CALLAO", "dif"] / 994494 * 1000,
+          dc[dc$provincia == "TRUJILLO", "dif"] / 970016 * 1000,
+          dc[dc$provincia == "PIURA", "dif"] / 799321 * 1000,
+          dc[dc$provincia == "HUANCAYO", "dif"] / 545615 * 1000,
+          dc[dc$provincia == "MAYNAS", "dif"] / 479866 * 1000,
+          dc[dc$provincia == "CUSCO", "dif"] / 447588 * 1000,
+          dc[dc$provincia == "SANTA", "dif"] / 435807 * 1000,
+          dc[dc$provincia == "ICA", "dif"] / 391519 * 1000,
+          dc[dc$provincia == "CORONEL PORTILLO", "dif"] / 384168 * 1000,
+          dc[dc$provincia == "CAJAMARCA", "dif"] / 348433 * 1000,
+          dc[dc$provincia == "SULLANA", "dif"] / 311454 * 1000,
+          dc[dc$provincia == "SAN ROMAN", "dif"] / 307417 * 1000,
+          dc[dc$provincia == "TACNA", "dif"] / 306363 * 1000,
+          dc[dc$provincia == "HUANUCO", "dif"] / 293397 * 1000,
+          dc[dc$provincia == "HUAMANGA", "dif"] / 282194 * 1000,
+          dc[dc$provincia == "CAÑETE", "dif"] / 240013 * 1000,
+          dc[dc$provincia == "HUAURA", "dif"] / 227685 * 1000,
+          dc[dc$provincia == "CHINCHA", "dif"] / 226113 * 1000,
+          dc[dc$provincia == "PUNO", "dif"] / 219494 * 1000,
+          dc[dc$provincia == "SATIPO", "dif"] / 203985 * 1000,
+          dc[dc$provincia == "SAN MARTIN", "dif"] / 193095 * 1000,
+          dc[dc$provincia == "JAEN", "dif"] / 185432 * 1000)
+alti <- c(161, 2335, 5, 34, 36, 3246, 105, 3399, 5, 406, 154, 2750, 65, 3824,
+          562, 1898, 2761, 40, 30, 97, 3810, 631, 350, 729)
+
+temp <- data.frame(provincia = prov,
+                   exceso = exce,
+                   altitud = alti)
+
+ggplot(temp, aes(alti, exce)) +
+  geom_point() +
+  labs(x = "Altitud de la ciudad más poblada (m s.n.m.)",
+       y = "Exceso de fallecidos por 1000 habitantes",
+       title = "Exceso de fallecidos por 1000 habitantes para el año 2020 con respecto
+a la media 2018-2019 para las provincias más pobladas con relación a su altitud") + 
+  geom_text_repel(label = prov) +
+  geom_smooth(method = "lm", se = FALSE)
+
+```
+
+## 7. Evolución del número de fallecidos diarios por causa no violenta en el 2020 por edad y sexo
+
+Se sabe que la letalidad de COVID-19 es mayor en hombres que en mujeres y que se incrementa considerablemente con la edad. Los siguientes gráficos permiten evaluar el efecto de la epidemia por sexo y edad en el Perú.
+
+```{r echo = FALSE, message = FALSE}
+
+# Seleccionar desde 1 de marzo hasta el último día
+
+temp <- full.nv[full.nv$mes >= 3 & full.nv$mes <= ultimo.mes, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Limpiar solo hombres y mujeres
+
+temp <- temp[temp$sexo == "FEMENINO" | temp$sexo == "MASCULINO", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", c("fecha", "sexo"), "ano", dfr = temp, method = 'slow')
+
+# Formato
+
+ds$mes <- substr(as.character(ds$fecha), 6, 7)
+ds$dia <- substr(as.character(ds$fecha), 9, 10)
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, -3]
+colnames(dc)[3] <- "total20"
+temp <- ds[ds$ano == 2019, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total19"
+dc <- merge(dc, temp)
+temp <- ds[ds$ano == 2018, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total18"
+dc <- merge(dc, temp)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# Diferencia y ratio
+
+dc$dif <- dc$total20 - dc$media1819
+dc$ratio <- dc$total20 / dc$media1819
+
+# Grafico
+
+dc$sexo[dc$sexo == "MASCULINO"] <- "Masculino"
+dc$sexo[dc$sexo == "FEMENINO"] <- "Femenino"
+
+niveles <- c("Masculino", "Femenino")
+dc$Sexo <- factor(dc$sexo, levels = niveles, ordered = TRUE)
+
+ggplot(dc, aes(fecha, dif, colour = Sexo)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Diferencia entre el año 2020 y la media 2018-2019",
+       title = "Número de fallecidos diarios a nivel nacional por causa no violenta según sexo") + 
+  geom_smooth(method = "auto", span = 0.9)
+
+ggplot(dc, aes(fecha, ratio, colour = Sexo)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Cociente entre el año 2020 y la media 2018-2019",
+       title = "Número de fallecidos diarios a nivel nacional por causa no violenta según sexo") + 
+  geom_smooth(method = "auto", span = 0.9)
+
+```
+
+```{r echo = FALSE, message = FALSE}
+
+# Seleccionar desde 1 de marzo hasta el último día
+
+temp <- full.nv[full.nv$mes >= 3 & full.nv$mes <= ultimo.mes, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+# Limpiar solo edad en anos
+
+temp <- temp[temp$unidad == "AÑOS", ]
+
+# Grupos
+
+temp$grupo <- "Mayor de 75"
+temp$grupo[temp$edad < 75] <- "65 a 75"
+temp$grupo[temp$edad < 65] <- "55 a 65"
+temp$grupo[temp$edad < 55] <- "45 a 55"
+temp$grupo[temp$edad < 45] <- "35 a 45"
+temp$grupo[temp$edad < 35] <- "Menor de 35"
+
+# Conteo diario
+
+ds <- docomp("count", "pais", c("fecha", "grupo"), "ano", dfr = temp, method = 'slow')
+
+# Formato
+
+ds$mes <- substr(as.character(ds$fecha), 6, 7)
+ds$dia <- substr(as.character(ds$fecha), 9, 10)
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, -3]
+colnames(dc)[3] <- "total20"
+temp <- ds[ds$ano == 2019, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total19"
+dc <- merge(dc, temp)
+temp <- ds[ds$ano == 2018, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total18"
+dc <- merge(dc, temp)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# ratio
+
+dc$ratio <- dc$total20 / dc$media1819
+
+# Grafico
+
+niveles <- c("55 a 65", "65 a 75", "45 a 55", "35 a 45", "Mayor de 75", "Menor de 35")
+dc$`Grupo de edad` <- factor(dc$grupo, levels = niveles, ordered = TRUE)
+
+ggplot(dc, aes(fecha, ratio, colour = `Grupo de edad`)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Cociente entre el año 2020 y la media 2018-2019",
+       name = "Grupo de Edad",
+       title = "Número de fallecidos diarios a nivel nacional por causa no violenta
+según grupo de edad") + 
+  geom_smooth(method = "auto", span = 0.9, se = FALSE)
+
+```
