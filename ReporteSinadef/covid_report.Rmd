@@ -7,10 +7,10 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
-```{r echo = FALSE}
+```{r}
 
 library(ggplot2)
 library(ggrepel)
@@ -23,7 +23,7 @@ options(digits = 4)
 
 # Leer datos
 
-full <- data.frame(read_excel("SINADEF_DATOS_ABIERTOS_17062020.xlsx"))
+full <- data.frame(read_excel("SINADEF_DATOS_ABIERTOS_22062020.xlsx"))
 full$fecha <- as.Date(full$fecha, "%Y-%m-%d")
 full$mes <- as.numeric(full$mes)
 full$ano <- as.numeric(full$ano)
@@ -31,6 +31,11 @@ full$ano <- as.numeric(full$ano)
 # Eliminar otros paises
 
 full <- full[full$pais == "PERU", ]
+
+# Juntar Lima y Callao
+
+full$prov2 <- full$provincia
+full$prov2[full$prov2 %in% c("CALLAO", "LIMA")] <- "LIMA Y CALLAO"
 
 # Eliminar muerte violenta
 
@@ -88,7 +93,7 @@ Los siguientes gráficos permiten evaluar el efecto COVID-19; el primero en el s
 
 El segundo gráfico no considera el posible efecto positivo en la disminución del número de muertes violentas.
 
-```{r echo = FALSE}
+```{r}
 
 # Seleccionar datos hasta el ultimo dia de todos los años
 
@@ -112,7 +117,7 @@ text(x = xx, y = totales, label = totales, pos = 3, cex = 0.8)
 
 La diferencia a la fecha entre este año y el 2019 es de `r totales[4] - totales[3]` para el número total de fallecidos.
 
-```{r echo = FALSE}
+```{r}
 
 # Seleccionar datos hasta el ultimo dia de todos los años
 
@@ -140,12 +145,14 @@ La diferencia a la fecha entre este año y el 2019 es de `r totales[4] - totales
 
 Los siguientes gráficos permiten evaluar la evolución de la epidemia a través de su efecto en el número de fallecimientos diarios por causa no violenta, a nivel nacional y en las provincias con mayor población.
 
-```{r echo = FALSE}
+```{r}
 
 # Solo año 2020
 
 temp <- full.nv[full.nv$ano == 2020, ]
 temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+
+## Total nacional
 
 # Conteo diario
 
@@ -153,36 +160,19 @@ ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
 # Gráfico
 
-titulo <- "Fallecidos diarios a nivel nacional por causa no violenta"
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) +
+       title = "Fallecidos diarios a nivel nacional por causa no violenta") +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+#  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 10, "2020-01-01")) +
+#  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE)
 
-```
+## Lima y Callao
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
-
-# Identificar principales provincias hasta antes del 2020
-
-temp <- full[full$ano != 2020, ]
-temp <- docomp("count", "pais", "provincia", dfr = temp, method = "slow")
-temp <- temp[sort.int(temp$pais, index.return = TRUE, decreasing = TRUE)$ix, ]
-provincias <- temp$provincia
-
-# Solo año 2020
-
-temp <- full.nv[full.nv$ano == 2020, ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
-
-# Provincia 1
-
-i <- 1
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia %in% c("CALLAO", "LIMA"), ]
 
 # Conteo diario
 
@@ -190,21 +180,21 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 36, "2020-01-01")) +
+#   geom_smooth(data = ds[ds$fecha < "2020-06-21", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 4) + # verde
+#   geom_smooth(data = ds[ds$fecha < "2020-06-19", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
+#   geom_smooth(data = ds[ds$fecha < "2020-06-17", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 3) # azul
 
-# Provincia 2
+## Arequipa
 
-i <- 2
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "AREQUIPA", ]
 
 # Conteo diario
 
@@ -212,21 +202,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Arequipa por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 3
+## Trujillo
 
-i <- 3
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "TRUJILLO", ]
 
 # Conteo diario
 
@@ -234,21 +220,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Trujillo por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 4
+## Chiclayo
 
-i <- 4
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "CHICLAYO", ]
 
 # Conteo diario
 
@@ -256,21 +238,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Chiclayo por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 5
+## Piura
 
-i <- 5
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "PIURA", ]
 
 # Conteo diario
 
@@ -278,21 +256,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Piura por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 6
+## Huancayo
 
-i <- 6
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "HUANCAYO", ]
 
 # Conteo diario
 
@@ -300,21 +274,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Huancayo por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 7
+## Maynas
 
-i <- 7
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "MAYNAS", ]
 
 # Conteo diario
 
@@ -322,21 +292,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Maynas por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 8
+## Cusco
 
-i <- 8
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "CUSCO", ]
 
 # Conteo diario
 
@@ -344,21 +310,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Cusco por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 9
+## Santa
 
-i <- 9
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "SANTA", ]
 
 # Conteo diario
 
@@ -366,21 +328,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Santa por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 10
+## Ica
 
-i <- 10
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "ICA", ]
 
 # Conteo diario
 
@@ -388,21 +346,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Ica por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 11
+## Coronel Portillo
 
-i <- 11
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "CORONEL PORTILLO", ]
 
 # Conteo diario
 
@@ -410,21 +364,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Coronel Portillo por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 12
+## Cajarmarca
 
-i <- 12
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "CAJAMARCA", ]
 
 # Conteo diario
 
@@ -432,21 +382,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Cajamarca por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 13
+## Sullana
 
-i <- 13
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "SULLANA", ]
 
 # Conteo diario
 
@@ -454,21 +400,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Sullana por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 14
+## San Román
 
-i <- 14
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "SAN ROMAN", ]
 
 # Conteo diario
 
@@ -476,21 +418,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de San Román por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 15
+## Tacna
 
-i <- 15
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "TACNA", ]
 
 # Conteo diario
 
@@ -498,21 +436,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Tacna por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 16
+## Lambayeque
 
-i <- 16
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "LAMBAYEQUE", ]
 
 # Conteo diario
 
@@ -520,21 +454,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Lambayeque por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 17
+## Huanuco
 
-i <- 17
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "HUANUCO", ]
 
 # Conteo diario
 
@@ -542,21 +472,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Huánuco por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 18
+## Huamanga
 
-i <- 18
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "HUAMANGA", ]
 
 # Conteo diario
 
@@ -564,21 +490,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Huamanga por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 19
+## Cañete
 
-i <- 19
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "CAÑETE", ]
 
 # Conteo diario
 
@@ -586,21 +508,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Cañete por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 20
+## Huaura
 
-i <- 20
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "HUAURA", ]
 
 # Conteo diario
 
@@ -608,21 +526,17 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Huaura por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-# Provincia 31
+## Chincha
 
-i <- 31
-temp.p <- temp[temp$provincia == provincias[i], ]
+temp.p <- temp[temp$provincia == "CHINCHA", ]
 
 # Conteo diario
 
@@ -630,14 +544,191 @@ ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
 
 # Grafico
 
-titulo <- paste("Fallecidos diarios en la provincia de",
-                provincias[i], "por causa no violenta")
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Chincha por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Puno
+
+temp.p <- temp[temp$provincia == "PUNO", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = titulo) + 
+       title = "Fallecidos diarios en la provincia de Puno por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Satipo
+
+temp.p <- temp[temp$provincia == "SATIPO", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Satipo por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## San Martín
+
+temp.p <- temp[temp$provincia == "SAN MARTIN", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de San Martín por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Jaen
+
+temp.p <- temp[temp$provincia == "JAEN", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Jaen por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Huaral
+
+temp.p <- temp[temp$provincia == "HUARAL", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Huaral por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Huaraz
+
+temp.p <- temp[temp$provincia == "HUARAZ", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Huaraz por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Morropon
+
+temp.p <- temp[temp$provincia == "MORROPON", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Morropón por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Tumbes
+
+temp.p <- temp[temp$provincia == "TUMBES", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Tumbes por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Chanchamayo
+
+temp.p <- temp[temp$provincia == "CHANCHAMAYO", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Chanchamayo por causa no violenta") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+## Pisco
+
+temp.p <- temp[temp$provincia == "PISCO", ]
+
+# Conteo diario
+
+ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
+
+# Grafico
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Pisco por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
@@ -647,7 +738,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 En los siguientes gráficos se observan las 20 provincias y 40 distritos con mayor incremento de fallecimientos por causa no violenta en el último mes con respecto a la media del mismo periodo en el 2018 y 2019. Estos gráficos permiten identificar las provincias y distritos en los que la enfermedad podría haber avanzado más. Para evitar el efecto de muestras pequeñas, solo se consideran las provincias y distritos con un promedio de fallecimientos mensual mayor a 10 en la media del 2018 y 2019.
 
-```{r echo = FALSE, fig.width = 7.5, fig.height = 5}
+```{r fig.width = 7.5, fig.height = 5}
 
 # Seleccionar ultimo mes
 
@@ -657,7 +748,7 @@ temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > 
 
 # Conteo diario provincia
 
-ds <- docomp("count", "pais", c("ano", "provincia"), dfr = temp, method = 'slow')
+ds <- docomp("count", "pais", c("ano", "prov2"), dfr = temp, method = 'slow')
 
 # Datos por año
 
@@ -687,7 +778,7 @@ dc <- dc[(dim(dc)[1] - 19):dim(dc)[1], ]
 # Grafico provincia
 
 par(mar = c(4, 15, 2, 2) + 0.2)
-barplot(height = dc$ratio, names.arg = dc$provincia, horiz = TRUE, las = 1,
+barplot(height = dc$ratio, names.arg = dc$prov2, horiz = TRUE, las = 1,
         main = "Provincias con mayor incremento de fallecidos
 en el último mes",
         xlab = "Cociente entre fallecidos por causa no violenta
@@ -695,7 +786,7 @@ en 2020 y la media 2018-2019 en el último mes")
 
 ```
 
-```{r echo = FALSE, fig.width = 8, fig.height = 9}
+```{r fig.width = 8, fig.height = 9}
 
 # Conteo diario Distrito
 
@@ -742,7 +833,7 @@ en 2020 y la media 2018-2019 en el último mes")
 
 Si evaluamos el exceso de fallecidos este año con respecto a la media de los años 2018 y 2019 y lo presentamos como número de fallecidos por mil habitantes, podemos tener un indicador del avance de la enfermedad en el país y por provincia. En los gráficos de la sección 3 se puede identificar a ciertas provincias que ya habrían pasado por el pico para el número de fallecidos diarios, luego, el valor para el número de fallecidos por mil habitantes para estas provincias podría servir como un referente en relación con el pico de la enfermedad.
 
-```{r echo = FALSE}
+```{r}
 
 # Seleccionar datos hasta el ultimo dia de todos los años
 
@@ -751,7 +842,7 @@ temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > 
 
 # Conteo diario provincia y año
 
-ds <- docomp("count", "pais", c("ano", "provincia"), dfr = temp, method = 'slow')
+ds <- docomp("count", "pais", c("ano", "prov2"), dfr = temp, method = 'slow')
 
 # Datos por año
 
@@ -772,15 +863,14 @@ dc$media1819 <- (dc$total19 + dc$total18) / 2
 
 dc$dif <- dc$total20 - dc$media1819
 
-#| Chiclayo         | `r dc[dc$provincia == "CHICLAYO", "dif"] / 799675 * 1000` | 
-#| Lambayeque       | `r dc[dc$provincia == "LAMBAYEQUE", "dif"] / 300170 * 1000` | 
-#| Ica              | `r dc[dc$provincia == "ICA", "dif"] / 391519 * 1000` | 
-#| Pasco            | `r dc[dc$provincia == "PASCO", "dif"] /	123015 * 1000` | 
-#| Sechura          | `r dc[dc$provincia == "SECHURA", "dif"] /	79177 * 1000` | 
-#| Requena          | `r dc[dc$provincia == "REQUENA", "dif"] /	58511 * 1000` | 
-#| Huaral           | `r dc[dc$provincia == "HUARAL", "dif"] / 183898 * 1000` | 
-#| Tambopata        | `r dc[dc$provincia == "TAMBOPATA", "dif"] / 111474 * 1000` | 
-#| San Martin       | `r dc[dc$provincia == "SAN MARTIN", "dif"] / 193095 * 1000` | 
+#| Chiclayo         | `r dc[dc$prov2 == "CHICLAYO", "dif"] / 799675 * 1000` | 
+#| Lambayeque       | `r dc[dc$prov2 == "LAMBAYEQUE", "dif"] / 300170 * 1000` | 
+#| Ica              | `r dc[dc$prov2 == "ICA", "dif"] / 391519 * 1000` | 
+#| Pasco            | `r dc[dc$prov2 == "PASCO", "dif"] /	123015 * 1000` | 
+#| Sechura          | `r dc[dc$prov2 == "SECHURA", "dif"] /	79177 * 1000` | 
+#| Huaral           | `r dc[dc$prov2 == "HUARAL", "dif"] / 183898 * 1000` | 
+#| San Martin       | `r dc[dc$prov2 == "SAN MARTIN", "dif"] / 193095 * 1000` | 
+#| Viru             | `r dc[dc$prov2 == "VIRU", "dif"] / 92324 * 1000` | 
 
 ```
 
@@ -788,58 +878,67 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 
 | Provincia        | Exceso de fallecidos por 1000 habitantes |
 |:-----------------|:----------------------------------------:|
-| Chincha          | `r dc[dc$provincia == "CHINCHA", "dif"] / 226113 * 1000` | 
-| Callao           | `r dc[dc$provincia == "CALLAO", "dif"] / 994494 * 1000` |
-| Coronel Portillo | `r dc[dc$provincia == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
-| Lima             | `r dc[dc$provincia == "LIMA", "dif"] / 8574974 * 1000` |
-| Tumbes           | `r dc[dc$provincia == "TUMBES", "dif"] / 154962 * 1000` |
-| Santa            | `r dc[dc$provincia == "SANTA", "dif"] / 435807 * 1000` | 
-| Casma            | `r dc[dc$provincia == "CASMA", "dif"] /	50989 * 1000` | 
-| Maynas           | `r dc[dc$provincia == "MAYNAS", "dif"] / 479866 * 1000` |
-| Huarochiri       | `r dc[dc$provincia == "HUAROCHIRI", "dif"] / 58145 * 1000` | 
-| Paita            | `r dc[dc$provincia == "PAITA", "dif"] / 129892 * 1000` | 
-| Piura            | `r dc[dc$provincia == "PIURA", "dif"] / 799321 * 1000` | 
-| Sullana          | `r dc[dc$provincia == "SULLANA", "dif"] / 311454 * 1000` | 
-| Trujillo         | `r dc[dc$provincia == "TRUJILLO", "dif"] / 970016 * 1000` | 
-| Alto Amazonas    | `r dc[dc$provincia == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
+| Chincha          | `r dc[dc$prov2 == "CHINCHA", "dif"] / 226113 * 1000` | 
+| Lima y Callao    | `r dc[dc$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000` |
+| Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
+| Tumbes           | `r dc[dc$prov2 == "TUMBES", "dif"] / 154962 * 1000` |
+| Santa            | `r dc[dc$prov2 == "SANTA", "dif"] / 435807 * 1000` | 
+| Casma            | `r dc[dc$prov2 == "CASMA", "dif"] /	50989 * 1000` | 
+| Maynas           | `r dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000` |
+| Zarumilla        | `r dc[dc$prov2 == "ZARUMILLA", "dif"] / 48844 * 1000` | 
+| Huarochiri       | `r dc[dc$prov2 == "HUAROCHIRI", "dif"] / 58145 * 1000` | 
+| Paita            | `r dc[dc$prov2 == "PAITA", "dif"] / 129892 * 1000` | 
+| Trujillo         | `r dc[dc$prov2 == "TRUJILLO", "dif"] / 970016 * 1000` | 
+| Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
+| Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
+| Tambopata        | `r dc[dc$prov2 == "TAMBOPATA", "dif"] / 111474 * 1000` | 
+| Requena          | `r dc[dc$prov2 == "REQUENA", "dif"] /	58511 * 1000` | 
+| Alto Amazonas    | `r dc[dc$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
 | Total nacional   | `r (totales[4] - totales[3]) / 31237385 * 1000` |
 
 ## 6. Efecto COVID-19 y altura
 
-En el siguiente gráfico se observa la relación entre el exceso en el número de fallecidos con respecto a la media del 2018 y 2019 en casos por 1000 habitantes para las provincias más pobladas y la altitud de la ciudad más poblada de la provincia. Ya se sabe que existe un importante factor protector debido a la altura. Se consideran todas las provincias con más de 250 mil habitantes con la única excepción de Chiclayo (por las razones expuestas en la sección 1 de este documento).
+En el siguiente gráfico se observa la relación entre el exceso en el número de fallecidos con respecto a la media del 2018 y 2019 en casos por 1000 habitantes para las provincias más pobladas y la altitud de la ciudad más poblada de la provincia. Ya se sabe que existe un importante factor protector debido a la altura. Se consideran todas las provincias con más de 150 mil habitantes con la excepción de Chiclayo y Lambayeque (por las razones expuestas en la sección 1 de este documento).
 
-```{r echo = FALSE, message = FALSE}
+```{r}
 
-prov <- c("Lima", "Arequipa", "Callao", "Trujillo", "Piura", "Huancayo", "Maynas",
+prov <- c("Lima y Callao", "Arequipa", "Trujillo", "Piura", "Huancayo", "Maynas",
           "Cusco", "Santa", "Ica", "Coronel Portillo", "Cajamarca", "Sullana",
           "San Román", "Tacna", "Huánuco", "Huamanga", "Cañete", "Huaura",
-          "Chincha", "Puno", "Satipo", "San Martín", "Jaen")
-exce <- c(dc[dc$provincia == "LIMA", "dif"] / 8574974 * 1000,
-          dc[dc$provincia == "AREQUIPA", "dif"] / 1080635 * 1000,
-          dc[dc$provincia == "CALLAO", "dif"] / 994494 * 1000,
-          dc[dc$provincia == "TRUJILLO", "dif"] / 970016 * 1000,
-          dc[dc$provincia == "PIURA", "dif"] / 799321 * 1000,
-          dc[dc$provincia == "HUANCAYO", "dif"] / 545615 * 1000,
-          dc[dc$provincia == "MAYNAS", "dif"] / 479866 * 1000,
-          dc[dc$provincia == "CUSCO", "dif"] / 447588 * 1000,
-          dc[dc$provincia == "SANTA", "dif"] / 435807 * 1000,
-          dc[dc$provincia == "ICA", "dif"] / 391519 * 1000,
-          dc[dc$provincia == "CORONEL PORTILLO", "dif"] / 384168 * 1000,
-          dc[dc$provincia == "CAJAMARCA", "dif"] / 348433 * 1000,
-          dc[dc$provincia == "SULLANA", "dif"] / 311454 * 1000,
-          dc[dc$provincia == "SAN ROMAN", "dif"] / 307417 * 1000,
-          dc[dc$provincia == "TACNA", "dif"] / 306363 * 1000,
-          dc[dc$provincia == "HUANUCO", "dif"] / 293397 * 1000,
-          dc[dc$provincia == "HUAMANGA", "dif"] / 282194 * 1000,
-          dc[dc$provincia == "CAÑETE", "dif"] / 240013 * 1000,
-          dc[dc$provincia == "HUAURA", "dif"] / 227685 * 1000,
-          dc[dc$provincia == "CHINCHA", "dif"] / 226113 * 1000,
-          dc[dc$provincia == "PUNO", "dif"] / 219494 * 1000,
-          dc[dc$provincia == "SATIPO", "dif"] / 203985 * 1000,
-          dc[dc$provincia == "SAN MARTIN", "dif"] / 193095 * 1000,
-          dc[dc$provincia == "JAEN", "dif"] / 185432 * 1000)
-alti <- c(161, 2335, 5, 34, 36, 3246, 105, 3399, 5, 406, 154, 2750, 65, 3824,
-          562, 1898, 2761, 40, 30, 97, 3810, 631, 350, 729)
+          "Chincha", "Puno", "Satipo", "San Martín", "Jaen", "Huaral", "Huaraz",
+          "Morropón", "Tumbes", "Chanchamayo", "Pisco")
+exce <- c(dc[dc$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000,
+          dc[dc$prov2 == "AREQUIPA", "dif"] / 1080635 * 1000,
+          dc[dc$prov2 == "TRUJILLO", "dif"] / 970016 * 1000,
+          dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000,
+          dc[dc$prov2 == "HUANCAYO", "dif"] / 545615 * 1000,
+          dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000,
+          dc[dc$prov2 == "CUSCO", "dif"] / 447588 * 1000,
+          dc[dc$prov2 == "SANTA", "dif"] / 435807 * 1000,
+          dc[dc$prov2 == "ICA", "dif"] / 391519 * 1000,
+          dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000,
+          dc[dc$prov2 == "CAJAMARCA", "dif"] / 348433 * 1000,
+          dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000,
+          dc[dc$prov2 == "SAN ROMAN", "dif"] / 307417 * 1000,
+          dc[dc$prov2 == "TACNA", "dif"] / 306363 * 1000,
+          dc[dc$prov2 == "HUANUCO", "dif"] / 293397 * 1000,
+          dc[dc$prov2 == "HUAMANGA", "dif"] / 282194 * 1000,
+          dc[dc$prov2 == "CAÑETE", "dif"] / 240013 * 1000,
+          dc[dc$prov2 == "HUAURA", "dif"] / 227685 * 1000,
+          dc[dc$prov2 == "CHINCHA", "dif"] / 226113 * 1000,
+          dc[dc$prov2 == "PUNO", "dif"] / 219494 * 1000,
+          dc[dc$prov2 == "SATIPO", "dif"] / 203985 * 1000,
+          dc[dc$prov2 == "SAN MARTIN", "dif"] / 193095 * 1000,
+          dc[dc$prov2 == "JAEN", "dif"] / 185432 * 1000,
+          dc[dc$prov2 == "HUARAL", "dif"] / 183898 * 1000,
+          dc[dc$prov2 == "HUARAZ", "dif"] / 163936 * 1000,
+          dc[dc$prov2 == "MORROPON", "dif"] / 162027 * 1000,
+          dc[dc$prov2 == "TUMBES", "dif"] / 154962 * 1000,
+          dc[dc$prov2 == "CHANCHAMAYO", "dif"] / 151489 * 1000,
+          dc[dc$prov2 == "PISCO", "dif"] / 150744 * 1000)
+alti <- c(161, 2335, 34, 36, 3246, 105, 3399, 5, 406, 154, 2750, 65, 3824,
+          562, 1898, 2761, 40, 30, 97, 3810, 631, 350, 729, 188, 3052, 92,
+          6, 751, 17)
 
 temp <- data.frame(provincia = prov,
                    exceso = exce,
@@ -860,7 +959,7 @@ a la media 2018-2019 para las provincias más pobladas con relación a su altitu
 
 Se sabe que la letalidad de COVID-19 es mayor en hombres que en mujeres y que se incrementa considerablemente con la edad. Los siguientes gráficos permiten evaluar el efecto de la epidemia por sexo y edad en el Perú.
 
-```{r echo = FALSE, message = FALSE}
+```{r}
 
 # Seleccionar desde 1 de marzo hasta el último día
 
@@ -924,7 +1023,7 @@ ggplot(dc, aes(fecha, ratio, colour = Sexo)) +
 
 ```
 
-```{r echo = FALSE, message = FALSE}
+```{r}
 
 # Seleccionar desde 1 de marzo hasta el último día
 
