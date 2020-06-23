@@ -10,20 +10,28 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
-```{r}
+```{r datos, include = FALSE}
 
 library(ggplot2)
 library(ggrepel)
 library(st4gi)
 library(reshape)
 library(readxl)
+library(httr)
 
 options(stringsAsFactors = FALSE)
 options(digits = 4)
 
 # Leer datos
 
-full <- data.frame(read_excel("SINADEF_DATOS_ABIERTOS_22062020.xlsx"))
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_22062020.xlsx"
+GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
+full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "PAIS.DOMICILIO", "PROVINCIA.DOMICILIO",
+                 "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES", "MUERTE.VIOLENTA")]
+colnames(full) <- c("sexo", "edad", "unidad", "pais", "provincia",
+                    "distrito", "fecha", "ano", "mes", "violenta")
+
 full$fecha <- as.Date(full$fecha, "%Y-%m-%d")
 full$mes <- as.numeric(full$mes)
 full$ano <- as.numeric(full$ano)
