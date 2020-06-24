@@ -879,6 +879,8 @@ dc$dif <- dc$total20 - dc$media1819
 #| Huaral           | `r dc[dc$prov2 == "HUARAL", "dif"] / 183898 * 1000` | 
 #| San Martin       | `r dc[dc$prov2 == "SAN MARTIN", "dif"] / 193095 * 1000` | 
 #| Viru             | `r dc[dc$prov2 == "VIRU", "dif"] / 92324 * 1000` | 
+#| Pisco            | `r dc[dc$prov2 == "PISCO", "dif"] / 150744 * 1000` | 
+#| Leoncio Prado    | `r dc[dc$prov2 == "LEONCIO PRADO", "dif"] / 127793 * 1000` | 
 
 ```
 
@@ -888,8 +890,8 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 |:-----------------|:----------------------------------------:|
 | Chincha          | `r dc[dc$prov2 == "CHINCHA", "dif"] / 226113 * 1000` | 
 | Lima y Callao    | `r dc[dc$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000` |
-| Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
 | Tumbes           | `r dc[dc$prov2 == "TUMBES", "dif"] / 154962 * 1000` |
+| Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
 | Santa            | `r dc[dc$prov2 == "SANTA", "dif"] / 435807 * 1000` | 
 | Casma            | `r dc[dc$prov2 == "CASMA", "dif"] /	50989 * 1000` | 
 | Maynas           | `r dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000` |
@@ -898,8 +900,8 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 | Paita            | `r dc[dc$prov2 == "PAITA", "dif"] / 129892 * 1000` | 
 | Trujillo         | `r dc[dc$prov2 == "TRUJILLO", "dif"] / 970016 * 1000` | 
 | Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
-| Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
 | Tambopata        | `r dc[dc$prov2 == "TAMBOPATA", "dif"] / 111474 * 1000` | 
+| Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
 | Requena          | `r dc[dc$prov2 == "REQUENA", "dif"] /	58511 * 1000` | 
 | Alto Amazonas    | `r dc[dc$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
 | Total nacional   | `r (totales[4] - totales[3]) / 31237385 * 1000` |
