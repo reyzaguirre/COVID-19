@@ -26,8 +26,8 @@ options(digits = 4)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_23062020.xlsx"
-GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_24062020.xlsx"
+#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
@@ -884,13 +884,13 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 | Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
 | Santa            | `r dc[dc$prov2 == "SANTA", "dif"] / 435807 * 1000` | 
 | Casma            | `r dc[dc$prov2 == "CASMA", "dif"] /	50989 * 1000` | 
-| Maynas           | `r dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000` |
 | Zarumilla        | `r dc[dc$prov2 == "ZARUMILLA", "dif"] / 48844 * 1000` | 
+| Maynas           | `r dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000` |
 | Huarochiri       | `r dc[dc$prov2 == "HUAROCHIRI", "dif"] / 58145 * 1000` | 
 | Paita            | `r dc[dc$prov2 == "PAITA", "dif"] / 129892 * 1000` | 
 | Trujillo         | `r dc[dc$prov2 == "TRUJILLO", "dif"] / 970016 * 1000` | 
-| Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
 | Tambopata        | `r dc[dc$prov2 == "TAMBOPATA", "dif"] / 111474 * 1000` | 
+| Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
 | Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
 | Requena          | `r dc[dc$prov2 == "REQUENA", "dif"] /	58511 * 1000` | 
 | Alto Amazonas    | `r dc[dc$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
@@ -957,9 +957,9 @@ a la media 2018-2019 para las provincias más pobladas con relación a su altitu
 
 ## 7. Evolución del número de fallecidos diarios por causa no violenta en el 2020 por sexo, edad, y nivel de instrucción
 
-Se sabe que la letalidad de COVID-19 es mayor en hombres que en mujeres y que se incrementa considerablemente con la edad. Se observa también diferencias entre grupos con diferente nivel de instrucción. Los siguientes gráficos permiten evaluar el efecto de la epidemia por sexo, edad y nivel de instrucción en el Perú.
+Se sabe que la letalidad de COVID-19 es mayor en hombres que en mujeres y que se incrementa considerablemente con la edad. Se observa también diferencias entre grupos con diferente nivel de instrucción, aunque este efecto podría estar confundido con el sexo, la edad y la zona de residencia (urbano o rural). Los siguientes gráficos permiten evaluar el efecto de la epidemia por sexo, edad y nivel de instrucción en el Perú.
 
-```{r edad}
+```{r sexo}
 
 # Limpiar solo hombres y mujeres
 
@@ -994,20 +994,13 @@ dc$media1819 <- (dc$total19 + dc$total18) / 2
 dc$dif <- dc$total20 - dc$media1819
 dc$ratio <- dc$total20 / dc$media1819
 
-# Graficos
+# Grafico
 
 dc$sexo[dc$sexo == "MASCULINO"] <- "Masculino"
 dc$sexo[dc$sexo == "FEMENINO"] <- "Femenino"
 
 niveles <- c("Masculino", "Femenino")
 dc$Sexo <- factor(dc$sexo, levels = niveles, ordered = TRUE)
-
-ggplot(dc, aes(fecha, dif, colour = Sexo)) +
-  geom_point() +
-  labs(x = "Fecha",
-       y = "Diferencia entre el año 2020 y la media 2018-2019",
-       title = "Número de fallecidos diarios a nivel nacional por causa no violenta según sexo") + 
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ggplot(dc, aes(fecha, ratio, colour = Sexo)) +
   geom_point() +
@@ -1018,7 +1011,7 @@ ggplot(dc, aes(fecha, ratio, colour = Sexo)) +
 
 ```
 
-```{r sexo}
+```{r edad}
 
 # Limpiar solo edad en anos
 
@@ -1077,16 +1070,16 @@ según grupo de edad") +
 
 ```
 
-```{r instrucción}
+```{r instrucción_femenino}
 
-# Limpiar solo instrucción definida
+# Limpiar solo instrucción definida femenino
 
-temp <- full.nv[!(full.nv$educa == "IGNORADO" | full.nv$educa == "SIN REGISTRO"), ]
+temp <- full.nv[!(full.nv$educa == "IGNORADO" | full.nv$educa == "SIN REGISTRO") & full.nv$sexo == "FEMENINO", ]
 
 # Grupos
 
 temp$grupo <- "Superior"
-temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")] <- "Ninguno"
+temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")] <- "Ninguna"
 temp$grupo[temp$educa %in% c("PRIMARIA COMPLETA", "PRIMARIA INCOMPLETA")] <- "Primaria"
 temp$grupo[temp$educa %in% c("SECUNDARIA COMPLETA", "SECUNDARIA INCOMPLETA")] <- "Secundaria"
 
@@ -1120,7 +1113,7 @@ dc$ratio <- dc$total20 / dc$media1819
 
 # Grafico
 
-niveles <- c("Secundaria", "Superior", "Primaria", "Ninguno")
+niveles <- c("Secundaria", "Superior", "Primaria", "Ninguna")
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(fecha, ratio, colour = Instrucción)) +
@@ -1128,25 +1121,21 @@ ggplot(dc, aes(fecha, ratio, colour = Instrucción)) +
   labs(x = "Fecha",
        y = "Cociente entre el año 2020 y la media 2018-2019",
        title = "Número de fallecidos diarios a nivel nacional por causa no violenta
-según nivel de instrucción") + 
+según nivel de instrucción - sexo femenino") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ```
 
-```{r instrucción}
+```{r instrucción_masculino}
 
-# Solo Lima y Callao
+# Limpiar solo instrucción definida femenino
 
-temp <- full.nv[full.nv$prov2 == "LIMA Y CALLAO", ]
-
-# Limpiar solo instrucción definida
-
-temp <- temp[!(temp$educa == "IGNORADO" | temp$educa == "SIN REGISTRO"), ]
+temp <- full.nv[!(full.nv$educa == "IGNORADO" | full.nv$educa == "SIN REGISTRO") & full.nv$sexo == "MASCULINO", ]
 
 # Grupos
 
 temp$grupo <- "Superior"
-temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")] <- "Ninguno"
+temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")] <- "Ninguna"
 temp$grupo[temp$educa %in% c("PRIMARIA COMPLETA", "PRIMARIA INCOMPLETA")] <- "Primaria"
 temp$grupo[temp$educa %in% c("SECUNDARIA COMPLETA", "SECUNDARIA INCOMPLETA")] <- "Secundaria"
 
@@ -1180,15 +1169,15 @@ dc$ratio <- dc$total20 / dc$media1819
 
 # Grafico
 
-niveles <- c("Secundaria", "Primaria", "Superior", "Ninguno")
+niveles <- c("Secundaria", "Superior", "Primaria", "Ninguna")
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(fecha, ratio, colour = Instrucción)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Cociente entre el año 2020 y la media 2018-2019",
-       title = "Número de fallecidos diarios en Lima y Callao por causa no violenta
-según nivel de instrucción") + 
+       title = "Número de fallecidos diarios a nivel nacional por causa no violenta
+según nivel de instrucción - sexo masculino") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ```
