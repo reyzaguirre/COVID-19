@@ -7,10 +7,8 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
-```
 
-```{r datos, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 library(ggplot2)
 library(ggrepel)
@@ -22,15 +20,22 @@ library(httr)
 options(stringsAsFactors = FALSE)
 options(digits = 4)
 
+```
+
+```{r datos, include = FALSE}
+
 # Leer datos
 
-#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_23062020.xlsx"
-#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_23062020.xlsx"
+GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
-full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "PAIS.DOMICILIO", "PROVINCIA.DOMICILIO",
-                 "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES", "MUERTE.VIOLENTA")]
-colnames(full) <- c("sexo", "edad", "unidad", "pais", "provincia",
+full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
+                 "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
+                 "MUERTE.VIOLENTA")]
+colnames(full) <- c("sexo", "edad", "unidad", "educa", "pais", "provincia",
                     "distrito", "fecha", "ano", "mes", "violenta")
+
+# Formato fecha
 
 full$fecha <- as.Date(full$fecha, "%Y-%m-%d")
 full$mes <- as.numeric(full$mes)
@@ -40,6 +45,34 @@ full$ano <- as.numeric(full$ano)
 
 full <- full[full$pais == "PERU", ]
 
+# Identificar ultimo dia
+
+ultimo.fecha <- max(full$fecha)
+ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10)) - 1 
+ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
+
+ultimo.mes.texto <- c("enero", "febrero", "marzo", "abril", "mayo", "junio",
+                      "julio", "agosto", "septiembre", "octubre", "noviembre",
+                      "diciembre")[ultimo.mes]
+
+# Diferencias 2017, 2018, 2019
+
+tt <- table(full$ano)
+dif17.19 <- (tt[3] - tt[1]) / tt[3] * 100
+dif18.19 <- (tt[3] - tt[2]) / tt[3] * 100
+
+# Conteo por año y provincia
+
+prov.ano <- table(full$provincia, full$ano)
+chcy <- prov.ano[rownames(prov.ano) == "CHICLAYO", ]
+ferr <- prov.ano[rownames(prov.ano) == "FERREÑAFE", ]
+lamb <- prov.ano[rownames(prov.ano) == "LAMBAYEQUE", ]
+
+# Datos hasta el último día de todos los años
+
+full <- full[full$mes <= ultimo.mes, ]
+full <- full[!(full$mes == ultimo.mes & as.numeric(substr(full$fecha, 9, 10)) > ultimo.dia), ]
+
 # Juntar Lima y Callao
 
 full$prov2 <- full$provincia
@@ -48,32 +81,6 @@ full$prov2[full$prov2 %in% c("CALLAO", "LIMA")] <- "LIMA Y CALLAO"
 # Eliminar muerte violenta
 
 full.nv <- full[full$violenta == "SIN REGISTRO", ]
-
-# Diferencias 2017, 2018, 2019
-
-tt <- table(full$ano)
-dif17.19 <- (tt[3] - tt[1]) / tt[3] * 100
-dif18.19 <- (tt[3] - tt[2]) / tt[3] * 100
-
-# Identificar ultimo dia
-
-ultimo.fecha <- max(full$fecha)
-
-# Texto de meses
-
-ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10)) - 1 
-ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
-
-ultimo.mes.texto <- c("enero", "febrero", "marzo", "abril", "mayo", "junio",
-                      "julio", "agosto", "septiembre", "octubre", "noviembre",
-                      "diciembre")[ultimo.mes]
-
-# Conteo por año y provincia
-
-prov.ano <- table(full$provincia, full$ano)
-chcy <- prov.ano[rownames(prov.ano) == "CHICLAYO", ]
-ferr <- prov.ano[rownames(prov.ano) == "FERREÑAFE", ]
-lamb <- prov.ano[rownames(prov.ano) == "LAMBAYEQUE", ]
 
 ```
 
@@ -101,16 +108,11 @@ Los siguientes gráficos permiten evaluar el efecto COVID-19; el primero en el s
 
 El segundo gráfico no considera el posible efecto positivo en la disminución del número de muertes violentas.
 
-```{r}
-
-# Seleccionar datos hasta el ultimo dia de todos los años
-
-temp <- full[full$mes <= ultimo.mes, ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+```{r barras_total}
 
 # Conteo por año
 
-totales <- table(temp$ano)
+totales <- table(full$ano)
 
 # Grafico de barras
 
@@ -125,16 +127,11 @@ text(x = xx, y = totales, label = totales, pos = 3, cex = 0.8)
 
 La diferencia a la fecha entre este año y el 2019 es de `r totales[4] - totales[3]` para el número total de fallecidos.
 
-```{r}
-
-# Seleccionar datos hasta el ultimo dia de todos los años
-
-temp <- full.nv[full.nv$mes <= ultimo.mes, ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+```{r barras_nv}
 
 # Conteo por año
 
-totales <- table(temp$ano)
+totales <- table(full.nv$ano)
 
 # Grafico de barras
 
@@ -153,12 +150,11 @@ La diferencia a la fecha entre este año y el 2019 es de `r totales[4] - totales
 
 Los siguientes gráficos permiten evaluar la evolución de la epidemia a través de su efecto en el número de fallecimientos diarios por causa no violenta, a nivel nacional y en las provincias con mayor población.
 
-```{r}
+```{r tendencias}
 
 # Solo año 2020
 
 temp <- full.nv[full.nv$ano == 2020, ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
 
 ## Total nacional
 
@@ -746,13 +742,12 @@ ggplot(ds, aes(fecha, pais)) +
 
 En los siguientes gráficos se observan las 20 provincias y 40 distritos con mayor incremento de fallecimientos por causa no violenta en el último mes con respecto a la media del mismo periodo en el 2018 y 2019. Estos gráficos permiten identificar las provincias y distritos en los que la enfermedad podría haber avanzado más. Para evitar el efecto de muestras pequeñas, solo se consideran las provincias y distritos con un promedio de fallecimientos mensual mayor a 10 en la media del 2018 y 2019.
 
-```{r fig.width = 7.5, fig.height = 5}
+```{r provincias, fig.width = 7.5, fig.height = 5}
 
 # Seleccionar ultimo mes
 
 temp <- full.nv[full.nv$mes %in% c(ultimo.mes - 1, ultimo.mes), ]
 temp <- temp[!(temp$mes == (ultimo.mes - 1) & as.numeric(substr(temp$fecha, 9, 10)) < ultimo.dia), ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
 
 # Conteo diario provincia
 
@@ -794,7 +789,7 @@ en 2020 y la media 2018-2019 en el último mes")
 
 ```
 
-```{r fig.width = 8, fig.height = 9}
+```{r distritos, fig.width = 8, fig.height = 9}
 
 # Conteo diario Distrito
 
@@ -841,16 +836,11 @@ en 2020 y la media 2018-2019 en el último mes")
 
 Si evaluamos el exceso de fallecidos este año con respecto a la media de los años 2018 y 2019 y lo presentamos como número de fallecidos por mil habitantes, podemos tener un indicador del avance de la enfermedad en el país y por provincia. En los gráficos de la sección 3 se puede identificar a ciertas provincias que ya habrían pasado por el pico para el número de fallecidos diarios, luego, el valor para el número de fallecidos por mil habitantes para estas provincias podría servir como un referente en relación con el pico de la enfermedad.
 
-```{r}
-
-# Seleccionar datos hasta el ultimo dia de todos los años
-
-temp <- full.nv[full.nv$mes <= ultimo.mes, ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+```{r exceso}
 
 # Conteo diario provincia y año
 
-ds <- docomp("count", "pais", c("ano", "prov2"), dfr = temp, method = 'slow')
+ds <- docomp("count", "pais", c("ano", "prov2"), dfr = full.nv, method = 'slow')
 
 # Datos por año
 
@@ -910,7 +900,7 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 
 En el siguiente gráfico se observa la relación entre el exceso en el número de fallecidos con respecto a la media del 2018 y 2019 en casos por 1000 habitantes para las provincias más pobladas y la altitud de la ciudad más poblada de la provincia. Ya se sabe que existe un importante factor protector debido a la altura. Se consideran todas las provincias con más de 150 mil habitantes con la excepción de Chiclayo y Lambayeque (por las razones expuestas en la sección 1 de este documento).
 
-```{r}
+```{r altura}
 
 prov <- c("Lima y Callao", "Arequipa", "Trujillo", "Piura", "Huancayo", "Maynas",
           "Cusco", "Santa", "Ica", "Coronel Portillo", "Cajamarca", "Sullana",
@@ -965,20 +955,15 @@ a la media 2018-2019 para las provincias más pobladas con relación a su altitu
 
 ```
 
-## 7. Evolución del número de fallecidos diarios por causa no violenta en el 2020 por edad y sexo
+## 7. Evolución del número de fallecidos diarios por causa no violenta en el 2020 por sexo, edad, y nivel de instrucción
 
-Se sabe que la letalidad de COVID-19 es mayor en hombres que en mujeres y que se incrementa considerablemente con la edad. Los siguientes gráficos permiten evaluar el efecto de la epidemia por sexo y edad en el Perú.
+Se sabe que la letalidad de COVID-19 es mayor en hombres que en mujeres y que se incrementa considerablemente con la edad. Se observa también diferencias entre grupos con diferente nivel de instrucción. Los siguientes gráficos permiten evaluar el efecto de la epidemia por sexo, edad y nivel de instrucción en el Perú.
 
-```{r}
-
-# Seleccionar desde 1 de marzo hasta el último día
-
-temp <- full.nv[full.nv$mes >= 3 & full.nv$mes <= ultimo.mes, ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+```{r edad}
 
 # Limpiar solo hombres y mujeres
 
-temp <- temp[temp$sexo == "FEMENINO" | temp$sexo == "MASCULINO", ]
+temp <- full.nv[full.nv$sexo == "FEMENINO" | full.nv$sexo == "MASCULINO", ]
 
 # Conteo diario
 
@@ -1009,7 +994,7 @@ dc$media1819 <- (dc$total19 + dc$total18) / 2
 dc$dif <- dc$total20 - dc$media1819
 dc$ratio <- dc$total20 / dc$media1819
 
-# Grafico
+# Graficos
 
 dc$sexo[dc$sexo == "MASCULINO"] <- "Masculino"
 dc$sexo[dc$sexo == "FEMENINO"] <- "Femenino"
@@ -1022,27 +1007,22 @@ ggplot(dc, aes(fecha, dif, colour = Sexo)) +
   labs(x = "Fecha",
        y = "Diferencia entre el año 2020 y la media 2018-2019",
        title = "Número de fallecidos diarios a nivel nacional por causa no violenta según sexo") + 
-  geom_smooth(method = "auto", span = 0.9)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ggplot(dc, aes(fecha, ratio, colour = Sexo)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Cociente entre el año 2020 y la media 2018-2019",
        title = "Número de fallecidos diarios a nivel nacional por causa no violenta según sexo") + 
-  geom_smooth(method = "auto", span = 0.9)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ```
 
-```{r}
-
-# Seleccionar desde 1 de marzo hasta el último día
-
-temp <- full.nv[full.nv$mes >= 3 & full.nv$mes <= ultimo.mes, ]
-temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+```{r sexo}
 
 # Limpiar solo edad en anos
 
-temp <- temp[temp$unidad == "AÑOS", ]
+temp <- full.nv[full.nv$unidad == "AÑOS", ]
 
 # Grupos
 
@@ -1077,7 +1057,7 @@ dc <- merge(dc, temp)
 
 dc$media1819 <- (dc$total19 + dc$total18) / 2
 
-# ratio
+# Ratio
 
 dc$ratio <- dc$total20 / dc$media1819
 
@@ -1093,6 +1073,122 @@ ggplot(dc, aes(fecha, ratio, colour = `Grupo de edad`)) +
        name = "Grupo de Edad",
        title = "Número de fallecidos diarios a nivel nacional por causa no violenta
 según grupo de edad") + 
-  geom_smooth(method = "auto", span = 0.9, se = FALSE)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+```
+
+```{r instrucción}
+
+# Limpiar solo instrucción definida
+
+temp <- full.nv[!(full.nv$educa == "IGNORADO" | full.nv$educa == "SIN REGISTRO"), ]
+
+# Grupos
+
+temp$grupo <- "Superior"
+temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")] <- "Ninguno"
+temp$grupo[temp$educa %in% c("PRIMARIA COMPLETA", "PRIMARIA INCOMPLETA")] <- "Primaria"
+temp$grupo[temp$educa %in% c("SECUNDARIA COMPLETA", "SECUNDARIA INCOMPLETA")] <- "Secundaria"
+
+# Conteo diario
+
+ds <- docomp("count", "pais", c("fecha", "grupo"), "ano", dfr = temp, method = 'slow')
+
+# Formato
+
+ds$mes <- substr(as.character(ds$fecha), 6, 7)
+ds$dia <- substr(as.character(ds$fecha), 9, 10)
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, -3]
+colnames(dc)[3] <- "total20"
+temp <- ds[ds$ano == 2019, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total19"
+dc <- merge(dc, temp)
+temp <- ds[ds$ano == 2018, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total18"
+dc <- merge(dc, temp)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# Ratio
+
+dc$ratio <- dc$total20 / dc$media1819
+
+# Grafico
+
+niveles <- c("Secundaria", "Superior", "Primaria", "Ninguno")
+dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
+
+ggplot(dc, aes(fecha, ratio, colour = Instrucción)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Cociente entre el año 2020 y la media 2018-2019",
+       title = "Número de fallecidos diarios a nivel nacional por causa no violenta
+según nivel de instrucción") + 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+```
+
+```{r instrucción}
+
+# Solo Lima y Callao
+
+temp <- full.nv[full.nv$prov2 == "LIMA Y CALLAO", ]
+
+# Limpiar solo instrucción definida
+
+temp <- temp[!(temp$educa == "IGNORADO" | temp$educa == "SIN REGISTRO"), ]
+
+# Grupos
+
+temp$grupo <- "Superior"
+temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")] <- "Ninguno"
+temp$grupo[temp$educa %in% c("PRIMARIA COMPLETA", "PRIMARIA INCOMPLETA")] <- "Primaria"
+temp$grupo[temp$educa %in% c("SECUNDARIA COMPLETA", "SECUNDARIA INCOMPLETA")] <- "Secundaria"
+
+# Conteo diario
+
+ds <- docomp("count", "pais", c("fecha", "grupo"), "ano", dfr = temp, method = 'slow')
+
+# Formato
+
+ds$mes <- substr(as.character(ds$fecha), 6, 7)
+ds$dia <- substr(as.character(ds$fecha), 9, 10)
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, -3]
+colnames(dc)[3] <- "total20"
+temp <- ds[ds$ano == 2019, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total19"
+dc <- merge(dc, temp)
+temp <- ds[ds$ano == 2018, c(2, 4, 5, 6)]
+colnames(temp)[2] <- "total18"
+dc <- merge(dc, temp)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# Ratio
+
+dc$ratio <- dc$total20 / dc$media1819
+
+# Grafico
+
+niveles <- c("Secundaria", "Primaria", "Superior", "Ninguno")
+dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
+
+ggplot(dc, aes(fecha, ratio, colour = Instrucción)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Cociente entre el año 2020 y la media 2018-2019",
+       title = "Número de fallecidos diarios en Lima y Callao por causa no violenta
+según nivel de instrucción") + 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ```
