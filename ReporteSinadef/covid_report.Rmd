@@ -26,7 +26,7 @@ options(digits = 4)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_25062020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_26062020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -191,10 +191,9 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 36, "2020-01-01")) +
-#   geom_smooth(data = ds[ds$fecha < "2020-06-21", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 4) + # verde
-#   geom_smooth(data = ds[ds$fecha < "2020-06-19", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
-#   geom_smooth(data = ds[ds$fecha < "2020-06-17", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 3) # azul
+#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 33, "2020-01-01")) +
+#   geom_smooth(data = ds[ds$fecha < "2020-06-23", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
+#   geom_smooth(data = ds[ds$fecha < "2020-06-26", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 3) # azul
 
 ## Arequipa
 
