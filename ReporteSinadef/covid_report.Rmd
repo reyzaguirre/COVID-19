@@ -26,7 +26,7 @@ options(digits = 4)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_26062020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_27062020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -40,6 +40,10 @@ colnames(full) <- c("sexo", "edad", "unidad", "educa", "pais", "provincia",
 full$fecha <- as.Date(full$fecha, "%Y-%m-%d")
 full$mes <- as.numeric(full$mes)
 full$ano <- as.numeric(full$ano)
+
+# Codificar semanas
+
+full$semana <- as.numeric(strftime(full$fecha, format = "%V"))
 
 # Eliminar otros paises
 
@@ -1027,22 +1031,17 @@ temp$grupo[temp$edad < 35] <- "Menor de 35"
 
 # Conteo diario
 
-ds <- docomp("count", "pais", c("fecha", "grupo"), "ano", dfr = temp, method = 'slow')
-
-# Formato
-
-ds$mes <- substr(as.character(ds$fecha), 6, 7)
-ds$dia <- substr(as.character(ds$fecha), 9, 10)
+ds <- docomp("count", "pais", c("semana", "grupo", "ano"), dfr = temp, method = 'slow')
 
 # Datos por año
 
 dc <- ds[ds$ano == 2020, -3]
 colnames(dc)[3] <- "total20"
-temp <- ds[ds$ano == 2019, c(2, 4, 5, 6)]
-colnames(temp)[2] <- "total19"
+temp <- ds[ds$ano == 2019, c(1, 2, 4)]
+colnames(temp)[3] <- "total19"
 dc <- merge(dc, temp)
-temp <- ds[ds$ano == 2018, c(2, 4, 5, 6)]
-colnames(temp)[2] <- "total18"
+temp <- ds[ds$ano == 2018, c(1, 2, 4)]
+colnames(temp)[3] <- "total18"
 dc <- merge(dc, temp)
 
 # Calcular media 2018 2019
@@ -1058,22 +1057,22 @@ dc$ratio <- dc$total20 / dc$media1819
 niveles <- c("55 a 65", "65 a 75", "45 a 55", "35 a 45", "Mayor de 75", "Menor de 35")
 dc$`Grupo de edad` <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
-ggplot(dc, aes(fecha, ratio, colour = `Grupo de edad`)) +
+ggplot(dc, aes(semana, ratio, colour = `Grupo de edad`)) +
   geom_point() +
-  labs(x = "Fecha",
+  labs(x = "Semana",
        y = "Cociente entre el año 2020 y la media 2018-2019",
        name = "Grupo de Edad",
-       title = "Número de fallecidos diarios a nivel nacional por causa no violenta
+       title = "Número de fallecidos semanales a nivel nacional por causa no violenta
 según grupo de edad") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ```
 
-```{r instrucción_femenino}
+```{r instrucción}
 
-# Limpiar solo instrucción definida femenino
+# Limpiar solo instrucción definida
 
-temp <- full.nv[!(full.nv$educa == "IGNORADO" | full.nv$educa == "SIN REGISTRO") & full.nv$sexo == "FEMENINO", ]
+temp <- full.nv[!(full.nv$educa == "IGNORADO" | full.nv$educa == "SIN REGISTRO"), ]
 
 # Grupos
 
@@ -1082,24 +1081,19 @@ temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")
 temp$grupo[temp$educa %in% c("PRIMARIA COMPLETA", "PRIMARIA INCOMPLETA")] <- "Primaria"
 temp$grupo[temp$educa %in% c("SECUNDARIA COMPLETA", "SECUNDARIA INCOMPLETA")] <- "Secundaria"
 
-# Conteo diario
+# Conteo semanal
 
-ds <- docomp("count", "pais", c("fecha", "grupo"), "ano", dfr = temp, method = 'slow')
+ds <- docomp("count", "pais", c("semana", "grupo", "ano", "sexo"), dfr = temp, method = 'slow')
 
-# Formato
+# Datos por año femenino
 
-ds$mes <- substr(as.character(ds$fecha), 6, 7)
-ds$dia <- substr(as.character(ds$fecha), 9, 10)
-
-# Datos por año
-
-dc <- ds[ds$ano == 2020, -3]
+dc <- ds[ds$ano == 2020 & ds$sexo == "FEMENINO", c(1, 2, 5)]
 colnames(dc)[3] <- "total20"
-temp <- ds[ds$ano == 2019, c(2, 4, 5, 6)]
-colnames(temp)[2] <- "total19"
+temp <- ds[ds$ano == 2019 & ds$sexo == "FEMENINO", c(1, 2, 5)]
+colnames(temp)[3] <- "total19"
 dc <- merge(dc, temp)
-temp <- ds[ds$ano == 2018, c(2, 4, 5, 6)]
-colnames(temp)[2] <- "total18"
+temp <- ds[ds$ano == 2018 & ds$sexo == "FEMENINO", c(1, 2, 5)]
+colnames(temp)[3] <- "total18"
 dc <- merge(dc, temp)
 
 # Calcular media 2018 2019
@@ -1115,47 +1109,23 @@ dc$ratio <- dc$total20 / dc$media1819
 niveles <- c("Secundaria", "Superior", "Primaria", "Ninguna")
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
-ggplot(dc, aes(fecha, ratio, colour = Instrucción)) +
+ggplot(dc, aes(semana, ratio, colour = Instrucción)) +
   geom_point() +
-  labs(x = "Fecha",
+  labs(x = "Semana",
        y = "Cociente entre el año 2020 y la media 2018-2019",
-       title = "Número de fallecidos diarios a nivel nacional por causa no violenta
+       title = "Número de fallecidos semanales a nivel nacional por causa no violenta
 según nivel de instrucción - sexo femenino") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-```
+# Datos por año masculino
 
-```{r instrucción_masculino}
-
-# Limpiar solo instrucción definida femenino
-
-temp <- full.nv[!(full.nv$educa == "IGNORADO" | full.nv$educa == "SIN REGISTRO") & full.nv$sexo == "MASCULINO", ]
-
-# Grupos
-
-temp$grupo <- "Superior"
-temp$grupo[temp$educa %in% c("INICIAL / PRE-ESCOLAR", "NINGUN NIVEL / ILETRADO")] <- "Ninguna"
-temp$grupo[temp$educa %in% c("PRIMARIA COMPLETA", "PRIMARIA INCOMPLETA")] <- "Primaria"
-temp$grupo[temp$educa %in% c("SECUNDARIA COMPLETA", "SECUNDARIA INCOMPLETA")] <- "Secundaria"
-
-# Conteo diario
-
-ds <- docomp("count", "pais", c("fecha", "grupo"), "ano", dfr = temp, method = 'slow')
-
-# Formato
-
-ds$mes <- substr(as.character(ds$fecha), 6, 7)
-ds$dia <- substr(as.character(ds$fecha), 9, 10)
-
-# Datos por año
-
-dc <- ds[ds$ano == 2020, -3]
+dc <- ds[ds$ano == 2020 & ds$sexo == "MASCULINO", c(1, 2, 5)]
 colnames(dc)[3] <- "total20"
-temp <- ds[ds$ano == 2019, c(2, 4, 5, 6)]
-colnames(temp)[2] <- "total19"
+temp <- ds[ds$ano == 2019 & ds$sexo == "MASCULINO", c(1, 2, 5)]
+colnames(temp)[3] <- "total19"
 dc <- merge(dc, temp)
-temp <- ds[ds$ano == 2018, c(2, 4, 5, 6)]
-colnames(temp)[2] <- "total18"
+temp <- ds[ds$ano == 2018 & ds$sexo == "MASCULINO", c(1, 2, 5)]
+colnames(temp)[3] <- "total18"
 dc <- merge(dc, temp)
 
 # Calcular media 2018 2019
@@ -1171,11 +1141,11 @@ dc$ratio <- dc$total20 / dc$media1819
 niveles <- c("Secundaria", "Superior", "Primaria", "Ninguna")
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
-ggplot(dc, aes(fecha, ratio, colour = Instrucción)) +
+ggplot(dc, aes(semana, ratio, colour = Instrucción)) +
   geom_point() +
-  labs(x = "Fecha",
+  labs(x = "Semana",
        y = "Cociente entre el año 2020 y la media 2018-2019",
-       title = "Número de fallecidos diarios a nivel nacional por causa no violenta
+       title = "Número de fallecidos semanales a nivel nacional por causa no violenta
 según nivel de instrucción - sexo masculino") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
