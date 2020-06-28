@@ -10,15 +10,15 @@ output: html_document
 
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
+options(stringsAsFactors = FALSE)
+options(digits = 4)
+
 library(ggplot2)
 library(ggrepel)
 library(st4gi)
 library(reshape)
 library(readxl)
 library(httr)
-
-options(stringsAsFactors = FALSE)
-options(digits = 4)
 
 ```
 
