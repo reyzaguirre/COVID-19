@@ -26,7 +26,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_27062020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_29062020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -195,9 +195,9 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 33, "2020-01-01")) +
+#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 31, "2020-01-01")) +
 #   geom_smooth(data = ds[ds$fecha < "2020-06-23", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
-#   geom_smooth(data = ds[ds$fecha < "2020-06-26", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 3) # azul
+#   geom_smooth(data = ds[ds$fecha < "2020-06-29", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 4) # azul
 
 ## Arequipa
 
@@ -874,6 +874,10 @@ dc$dif <- dc$total20 - dc$media1819
 #| Viru             | `r dc[dc$prov2 == "VIRU", "dif"] / 92324 * 1000` | 
 #| Pisco            | `r dc[dc$prov2 == "PISCO", "dif"] / 150744 * 1000` | 
 #| Leoncio Prado    | `r dc[dc$prov2 == "LEONCIO PRADO", "dif"] / 127793 * 1000` | 
+#| Jaen             | `r dc[dc$prov2 == "JAEN", "dif"] / 185432 * 1000` | 
+#| Huaura           | `r dc[dc$prov2 == "HUAURA", "dif"] / 227685 * 1000` | 
+#| Requena          | `r dc[dc$prov2 == "REQUENA", "dif"] /	58511 * 1000` | 
+#| Alto Amazonas    | `r dc[dc$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
 
 ```
 
@@ -882,10 +886,10 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 | Provincia        | Exceso de fallecidos por 1000 habitantes |
 |:-----------------|:----------------------------------------:|
 | Chincha          | `r dc[dc$prov2 == "CHINCHA", "dif"] / 226113 * 1000` | 
-| Lima y Callao    | `r dc[dc$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000` |
 | Tumbes           | `r dc[dc$prov2 == "TUMBES", "dif"] / 154962 * 1000` |
-| Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
+| Lima y Callao    | `r dc[dc$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000` |
 | Santa            | `r dc[dc$prov2 == "SANTA", "dif"] / 435807 * 1000` | 
+| Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
 | Casma            | `r dc[dc$prov2 == "CASMA", "dif"] /	50989 * 1000` | 
 | Zarumilla        | `r dc[dc$prov2 == "ZARUMILLA", "dif"] / 48844 * 1000` | 
 | Maynas           | `r dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000` |
@@ -895,8 +899,6 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 | Tambopata        | `r dc[dc$prov2 == "TAMBOPATA", "dif"] / 111474 * 1000` | 
 | Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
 | Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
-| Requena          | `r dc[dc$prov2 == "REQUENA", "dif"] /	58511 * 1000` | 
-| Alto Amazonas    | `r dc[dc$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
 | Total nacional   | `r (totales[4] - totales[3]) / 31237385 * 1000` |
 
 ## 6. Efecto COVID-19 y altura
@@ -1048,6 +1050,10 @@ dc <- merge(dc, temp)
 
 dc$media1819 <- (dc$total19 + dc$total18) / 2
 
+# Eliminar última semana
+
+dc <- dc[dc$semana < max(dc$semana), ]
+
 # Ratio
 
 dc$ratio <- dc$total20 / dc$media1819
@@ -1104,6 +1110,10 @@ dc$media1819 <- (dc$total19 + dc$total18) / 2
 
 dc$ratio <- dc$total20 / dc$media1819
 
+# Eliminar última semana
+
+dc <- dc[dc$semana < max(dc$semana), ]
+
 # Grafico
 
 niveles <- c("Secundaria", "Superior", "Primaria", "Ninguna")
@@ -1135,6 +1145,10 @@ dc$media1819 <- (dc$total19 + dc$total18) / 2
 # Ratio
 
 dc$ratio <- dc$total20 / dc$media1819
+
+# Eliminar última semana
+
+dc <- dc[dc$semana < max(dc$semana), ]
 
 # Grafico
 
