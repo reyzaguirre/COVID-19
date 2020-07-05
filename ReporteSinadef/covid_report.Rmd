@@ -878,6 +878,12 @@ dc$dif <- dc$total20 - dc$media1819
 #| Huaura           | `r dc[dc$prov2 == "HUAURA", "dif"] / 227685 * 1000` | 
 #| Requena          | `r dc[dc$prov2 == "REQUENA", "dif"] /	58511 * 1000` | 
 #| Alto Amazonas    | `r dc[dc$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
+#| Arequipa         | `r dc[dc$prov2 == "AREQUIPA", "dif"] / 1080635 * 1000` | 
+#| Ica              | `r dc[dc$prov2 == "ICA", "dif"] / 391519 * 1000` | 
+#| Cañete           | `r dc[dc$prov2 == "CAÑETE", "dif"] / 240013 * 1000` | 
+#| Huaraz           | `r dc[dc$prov2 == "HUARAZ", "dif"] / 163936 * 1000` | 
+#| Chanchamayo      | `r dc[dc$prov2 == "CHANCHAMAYO", "dif"] / 151489 * 1000` | 
+#| Huánuco          | `r dc[dc$prov2 == "HUANUCO", "dif"] / 293397 * 1000` | 
 
 ```
 
