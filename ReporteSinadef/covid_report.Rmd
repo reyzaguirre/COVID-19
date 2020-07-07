@@ -26,7 +26,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_05072020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_06072020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -900,10 +900,10 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 | Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
 | Zarumilla        | `r dc[dc$prov2 == "ZARUMILLA", "dif"] / 48844 * 1000` | 
 | Maynas           | `r dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000` |
-| Huarochiri       | `r dc[dc$prov2 == "HUAROCHIRI", "dif"] / 58145 * 1000` | 
 | Trujillo         | `r dc[dc$prov2 == "TRUJILLO", "dif"] / 970016 * 1000` | 
-| Paita            | `r dc[dc$prov2 == "PAITA", "dif"] / 129892 * 1000` | 
+| Huarochiri       | `r dc[dc$prov2 == "HUAROCHIRI", "dif"] / 58145 * 1000` | 
 | Tambopata        | `r dc[dc$prov2 == "TAMBOPATA", "dif"] / 111474 * 1000` | 
+| Paita            | `r dc[dc$prov2 == "PAITA", "dif"] / 129892 * 1000` | 
 | Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
 | Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
 | Total nacional   | `r (totales[4] - totales[3]) / 31237385 * 1000` |
