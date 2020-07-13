@@ -26,7 +26,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_09072020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_11072020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -907,7 +907,7 @@ En la siguiente tabla se muestra el exceso de fallecidos en el 2020 con respecto
 | Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
 | Viru             | `r dc[dc$prov2 == "VIRU", "dif"] / 92324 * 1000` | 
 | Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
-| Total nacional   | `r (totales[4] - totales[3]) / 31237385 * 1000` |
+| Total nacional   | `r (totales[4] - (totales[3] + totales[2]) / 2) / 31237385 * 1000` |
 
 ## 6. Efecto COVID-19 y altura
 
