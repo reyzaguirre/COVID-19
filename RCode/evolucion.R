@@ -47,19 +47,18 @@ full$prov2[full$prov2 %in% c("CALLAO", "LIMA")] <- "LIMA Y CALLAO"
 
 full.nv <- full[full$violenta == "SIN REGISTRO", ]
 
-# Totales nacionales por año
-
-totales <- table(full.nv$ano)
-
 # Solo año 2020
 
-temp <- full.nv[full.nv$ano == 2020, ]
+full2020 <- full.nv[full.nv$ano == 2020, ]
 
+###############################################################################
 ## Total nacional
+# 1.364: 10-07
+# 1.008: 18-06
 
 # Conteo diario
 
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- docomp("count", "pais", "fecha", dfr = full2020, method = 'slow')
 
 # Gráfico
 
@@ -69,11 +68,17 @@ ggplot(ds, aes(fecha, pais)) +
        y = "Número de fallecidos diarios",
        title = "Fallecidos diarios a nivel nacional por causa no violenta") +
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_vline(xintercept = as.Date("2020-06-18", "%Y-%m-%d"), linetype = 2, 
+           color = 3, size = 1.5)
 
+###############################################################################
 ## Lima y Callao
+# 3.006: 10-07
+# 2.029: 08-06
+# 1.004: 12-05
 
-temp.p <- temp[temp$provincia %in% c("CALLAO", "LIMA"), ]
+temp.p <- full2020[full2020$provincia %in% c("CALLAO", "LIMA"), ]
 
 # Conteo diario
 
@@ -87,11 +92,25 @@ ggplot(ds, aes(fecha, pais)) +
        y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_vline(xintercept = as.Date("2020-05-12", "%Y-%m-%d"), linetype = 2, 
+           color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-08", "%Y-%m-%d"), linetype = 2, 
+             color = 7, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-10", "%Y-%m-%d"), linetype = 2, 
+             color = 2, size = 1.5)
 
+###############################################################################
 ## Arequipa
+# 1.022: 28-06
 
-temp.p <- temp[temp$provincia == "AREQUIPA", ]
+distritos <- c("AREQUIPA", "ALTO SELVA ALEGRE", "CAYMA", "CERRO COLORADO", "JACOBO HUNTER",
+               "JOSE LUIS BUSTAMANTE Y RIVERO", "MARIANO MELGAR", "MIRAFLORES", "PAUCARPATA",
+               "SABANDIA", "SACHACA", "SOCABAYA", "TIABAYA", "YANAHUARA")
+poblacion <- c(55437, 85870, 91935, 197954, 50164, 81829, 59918, 60589, 131346, 4368,
+               24225, 75351, 16191, 25417)
+
+temp.p <- full2020[full2020$provincia == "AREQUIPA" & full2020$distrito %in% distritos, ]
 
 # Conteo diario
 
@@ -103,13 +122,22 @@ ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Arequipa por causa no violenta") + 
+       title = "Fallecidos diarios en la ciudad de Arequipa por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_vline(xintercept = as.Date("2020-06-28", "%Y-%m-%d"), linetype = 2, 
+             color = 3, size = 1.5)
 
+###############################################################################
 ## Trujillo
+# 2.026: 01-07
+# 1.002: 13-06
 
-temp.p <- temp[temp$provincia == "TRUJILLO", ]
+distritos <- c("TRUJILLO", "VICTOR LARCO HERRERA", "FLORENCIA DE MORA",
+               "EL PORVENIR", "LA ESPERANZA")
+poblacion <- c(314939, 68506, 37262, 190461, 189206)
+
+temp.p <- full2020[full2020$provincia == "TRUJILLO" & full2020$distrito %in% distritos, ]
 
 # Conteo diario
 
@@ -121,31 +149,22 @@ ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Trujillo por causa no violenta") + 
+       title = "Fallecidos diarios en la ciudad de Trujillo por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_vline(xintercept = as.Date("2020-06-13", "%Y-%m-%d"), linetype = 2, 
+             color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-01", "%Y-%m-%d"), linetype = 2, 
+             color = 7, size = 1.5)
 
+###############################################################################
 ## Piura
+# 1.021: 12-06
 
-temp.p <- temp[temp$provincia == "PIURA", ]
+distritos <- c("PIURA", "VEINTISEIS DE OCTUBRE", "CASTILLA", "CATACAOS")
+poblacion <- c(158495, 165779, 160201, 75870)
 
-# Conteo diario
-
-ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
-
-# Grafico
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha",
-       y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Piura por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
-
-## Maynas
-
-temp.p <- temp[temp$provincia == "MAYNAS", ]
+temp.p <- full2020[full2020$provincia == "PIURA" & full2020$distrito %in% distritos, ]
 
 # Conteo diario
 
@@ -157,13 +176,21 @@ ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Maynas por causa no violenta") + 
+       title = "Fallecidos diarios en la ciudad de Piura por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_vline(xintercept = as.Date("2020-06-13", "%Y-%m-%d"), linetype = 2, 
+             color = 3, size = 1.5)
 
-## Santa
+###############################################################################
+## Iquitos
+# 2.017: 20-05
+# 1.094: 04-05
 
-temp.p <- temp[temp$provincia == "SANTA", ]
+distritos <- c("IQUITOS", "BELEN", "PUNCHANA", "SAN JUAN BAUTISTA")
+poblacion <- c(146853, 64488, 75210, 127005)
+
+temp.p <- full2020[full2020$provincia == "MAYNAS" & full2020$distrito %in% distritos, ]
 
 # Conteo diario
 
@@ -175,13 +202,24 @@ ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Santa por causa no violenta") + 
+       title = "Fallecidos diarios en la ciudad de Iquitos por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_vline(xintercept = as.Date("2020-05-04", "%Y-%m-%d"), linetype = 2, 
+             color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-05-20", "%Y-%m-%d"), linetype = 2, 
+             color = 7, size = 1.5)
 
-## Coronel Portillo
+###############################################################################
+## Pucallpa
+# 2.992: 09-07
+# 2.029: 14-05
+# 1.024: 01-05
 
-temp.p <- temp[temp$provincia == "CORONEL PORTILLO", ]
+distritos <- c("CALLERIA", "YARINACOCHA", "MANANTAY")
+poblacion <- c(149999, 103941, 87525)
+
+temp.p <- full2020[full2020$provincia == "CORONEL PORTILLO" & full2020$distrito %in% distritos, ]
 
 # Conteo diario
 
@@ -193,90 +231,20 @@ ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha",
        y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Coronel Portillo por causa no violenta") + 
+       title = "Fallecidos diarios en la ciudad de Pucallpa por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_vline(xintercept = as.Date("2020-05-01", "%Y-%m-%d"), linetype = 2, 
+             color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-05-14", "%Y-%m-%d"), linetype = 2, 
+             color = 7, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-09", "%Y-%m-%d"), linetype = 2, 
+             color = 2, size = 1.5)
 
-## Sullana
-
-temp.p <- temp[temp$provincia == "SULLANA", ]
-
-# Conteo diario
-
-ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
-
-# Grafico
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha",
-       y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Sullana por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
-
-
-# Conteo diario provincia y año
-
-ds <- docomp("count", "pais", c("ano", "prov2"), dfr = full.nv, method = 'slow')
-
-# Datos por año
-
-dc <- ds[ds$ano == 2020, 2:3]
-colnames(dc)[2] <- "total20"
-temp.p <- ds[ds$ano == 2019, 2:3]
-colnames(temp.p)[2] <- "total19"
-dc <- merge(dc, temp.p)
-temp.p <- ds[ds$ano == 2018, 2:3]
-colnames(temp.p)[2] <- "total18"
-dc <- merge(dc, temp.p)
-
-# Calcular media 2018 2019
-
-dc$media1819 <- (dc$total19 + dc$total18) / 2
-
-# Diferencia
-
-dc$dif <- dc$total20 - dc$media1819
-
-#| Chiclayo         | `r dc[dc$prov2 == "CHICLAYO", "dif"] / 799675 * 1000` | 
-#| Lambayeque       | `r dc[dc$prov2 == "LAMBAYEQUE", "dif"] / 300170 * 1000` | 
-#| Ica              | `r dc[dc$prov2 == "ICA", "dif"] / 391519 * 1000` | 
-#| Pasco            | `r dc[dc$prov2 == "PASCO", "dif"] /	123015 * 1000` | 
-#| Sechura          | `r dc[dc$prov2 == "SECHURA", "dif"] /	79177 * 1000` | 
-#| Huaral           | `r dc[dc$prov2 == "HUARAL", "dif"] / 183898 * 1000` | 
-#| San Martin       | `r dc[dc$prov2 == "SAN MARTIN", "dif"] / 193095 * 1000` | 
-#| Pisco            | `r dc[dc$prov2 == "PISCO", "dif"] / 150744 * 1000` | 
-#| Leoncio Prado    | `r dc[dc$prov2 == "LEONCIO PRADO", "dif"] / 127793 * 1000` | 
-#| Jaen             | `r dc[dc$prov2 == "JAEN", "dif"] / 185432 * 1000` | 
-#| Huaura           | `r dc[dc$prov2 == "HUAURA", "dif"] / 227685 * 1000` | 
-#| Requena          | `r dc[dc$prov2 == "REQUENA", "dif"] /	58511 * 1000` | 
-#| Alto Amazonas    | `r dc[dc$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
-#| Arequipa         | `r dc[dc$prov2 == "AREQUIPA", "dif"] / 1080635 * 1000` | 
-#| Ica              | `r dc[dc$prov2 == "ICA", "dif"] / 391519 * 1000` | 
-#| Cañete           | `r dc[dc$prov2 == "CAÑETE", "dif"] / 240013 * 1000` | 
-#| Huaraz           | `r dc[dc$prov2 == "HUARAZ", "dif"] / 163936 * 1000` | 
-#| Chanchamayo      | `r dc[dc$prov2 == "CHANCHAMAYO", "dif"] / 151489 * 1000` | 
-#| Huánuco          | `r dc[dc$prov2 == "HUANUCO", "dif"] / 293397 * 1000` | 
-#| Ascope           | `r dc[dc$prov2 == "ASCOPE", "dif"] / 115786 * 1000` | 
-
-
-| Provincia        | Exceso de fallecidos por 1000 habitantes |
-  |:-----------------|:----------------------------------------:|
-  | Chincha          | `r dc[dc$prov2 == "CHINCHA", "dif"] / 226113 * 1000` | 
-  | Lima y Callao    | `r dc[dc$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000` |
-  | Tumbes           | `r dc[dc$prov2 == "TUMBES", "dif"] / 154962 * 1000` |
-  | Santa            | `r dc[dc$prov2 == "SANTA", "dif"] / 435807 * 1000` | 
-  | Casma            | `r dc[dc$prov2 == "CASMA", "dif"] /	50989 * 1000` | 
-  | Coronel Portillo | `r dc[dc$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000` |
-  | Zarumilla        | `r dc[dc$prov2 == "ZARUMILLA", "dif"] / 48844 * 1000` | 
-  | Trujillo         | `r dc[dc$prov2 == "TRUJILLO", "dif"] / 970016 * 1000` | 
-  | Maynas           | `r dc[dc$prov2 == "MAYNAS", "dif"] / 479866 * 1000` |
-  | Huarochiri       | `r dc[dc$prov2 == "HUAROCHIRI", "dif"] / 58145 * 1000` | 
-  | Tambopata        | `r dc[dc$prov2 == "TAMBOPATA", "dif"] / 111474 * 1000` | 
-  | Paita            | `r dc[dc$prov2 == "PAITA", "dif"] / 129892 * 1000` | 
-  | Sullana          | `r dc[dc$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
-  | Viru             | `r dc[dc$prov2 == "VIRU", "dif"] / 92324 * 1000` | 
-  | Piura            | `r dc[dc$prov2 == "PIURA", "dif"] / 799321 * 1000` | 
-  | Total nacional   | `r (totales[4] - totales[3]) / 31237385 * 1000` |
-  
+###########################################
+temp <- full.nv[full.nv$provincia == "CORONEL PORTILLO" & full.nv$distrito %in% distritos, ]
+temp <- temp[temp$mes <= 6, ]
+temp <- temp[!(temp$mes == 6 & as.numeric(substr(temp$fecha, 9, 10)) > 22), ]
+totales <- table(temp$ano)
+(totales[4] - (totales[3] + totales[2]) / 2) / sum(poblacion) * 1000
+##############################################
