@@ -26,8 +26,8 @@ library(httr)
 
 # Leer datos
 
-#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_15072020.xlsx"
-#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_15072020.xlsx"
+GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
@@ -178,7 +178,7 @@ Los siguientes gráficos permiten evaluar la evolución de la epidemia a través
 
 ## Total nacional
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Actual:",
                format((total.nv[4] - (total.nv[3] + total.nv[2]) / 2) / 31237.385, digits = 4))
 
 # Conteo diario
@@ -203,7 +203,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Lima y Callao
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Línea roja: 3\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Línea roja: 3\n- Actual:",
                format(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569.468, digits = 4))
 
 temp <- nv.20[nv.20$provincia %in% c("CALLAO", "LIMA"), ]
@@ -232,7 +232,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Arequipa
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Actual:",
                format(ex[ex$prov2 == "AREQUIPA", "dif"] / 1080.635, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "AREQUIPA", ]
@@ -255,7 +255,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Trujillo
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
                format(ex[ex$prov2 == "TRUJILLO", "dif"] / 970.016, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "TRUJILLO", ]
@@ -296,7 +296,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Piura
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Actual:",
                format(ex[ex$prov2 == "PIURA", "dif"] / 799.321, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "PIURA", ]
@@ -319,7 +319,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Huancayo
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
                format(ex[ex$prov2 == "HUANCAYO", "dif"] / 545.615, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "HUANCAYO", ]
@@ -341,7 +341,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Maynas
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
                format(ex[ex$prov2 == "MAYNAS", "dif"] / 479.866, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "MAYNAS", ]
@@ -365,7 +365,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Cusco
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
                format(ex[ex$prov2 == "CUSCO", "dif"] / 447.588, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "CUSCO", ]
@@ -387,7 +387,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Santa
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
                format(ex[ex$prov2 == "SANTA", "dif"] / 435.807, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "SANTA", ]
@@ -411,7 +411,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Ica
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Actual:",
                format(ex[ex$prov2 == "ICA", "dif"] / 391.519, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "ICA", ]
@@ -434,7 +434,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Coronel Portillo
 
-texto <- paste("Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual:",
                format(ex[ex$prov2 == "CORONEL PORTILLO", "dif"] / 384.168, digits = 4))
 
 temp <- nv.20[nv.20$provincia == "CORONEL PORTILLO", ]
