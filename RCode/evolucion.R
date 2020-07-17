@@ -56,6 +56,10 @@ full2020 <- full.nv[full.nv$ano == 2020, ]
 # 1.364: 10-07
 # 1.008: 18-06
 
+temp <- full.nv
+totales <- table(temp$ano)
+(totales[4] - (totales[3] + totales[2]) / 2) / 31237385 * 1000
+
 # Conteo diario
 
 ds <- docomp("count", "pais", "fecha", dfr = full2020, method = 'slow')
@@ -69,6 +73,9 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios a nivel nacional por causa no violenta") +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
+           label = "Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Actual: 1.423",
+           color = "blue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-06-18", "%Y-%m-%d"), linetype = 2, 
            color = 3, size = 1.5)
 
@@ -79,6 +86,10 @@ ggplot(ds, aes(fecha, pais)) +
 # 1.004: 12-05
 
 temp.p <- full2020[full2020$provincia %in% c("CALLAO", "LIMA"), ]
+
+temp <- full.nv[full.nv$prov2 == "LIMA Y CALLAO", ]
+totales <- table(temp$ano)
+(totales[4] - (totales[3] + totales[2]) / 2) / 9569468 * 1000
 
 # Conteo diario
 
@@ -93,6 +104,9 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
+           label = "Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Línea roja: 3\n- Actual: 3.096",
+           color = "blue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-05-12", "%Y-%m-%d"), linetype = 2, 
            color = 3, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-06-08", "%Y-%m-%d"), linetype = 2, 
@@ -112,6 +126,10 @@ poblacion <- c(55437, 85870, 91935, 197954, 50164, 81829, 59918, 60589, 131346, 
 
 temp.p <- full2020[full2020$provincia == "AREQUIPA" & full2020$distrito %in% distritos, ]
 
+temp <- full.nv[full.nv$provincia == "AREQUIPA" & full.nv$distrito %in% distritos, ]
+totales <- table(temp$ano)
+(totales[4] - (totales[3] + totales[2]) / 2) / sum(poblacion) * 1000
+
 # Conteo diario
 
 ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
@@ -125,6 +143,9 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios en la ciudad de Arequipa por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
+           label = "Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Actual: 1.806",
+           color = "blue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-06-28", "%Y-%m-%d"), linetype = 2, 
              color = 3, size = 1.5)
 
@@ -139,6 +160,10 @@ poblacion <- c(314939, 68506, 37262, 190461, 189206)
 
 temp.p <- full2020[full2020$provincia == "TRUJILLO" & full2020$distrito %in% distritos, ]
 
+temp <- full.nv[full.nv$provincia == "TRUJILLO" & full.nv$distrito %in% distritos, ]
+totales <- table(temp$ano)
+(totales[4] - (totales[3] + totales[2]) / 2) / sum(poblacion) * 1000
+
 # Conteo diario
 
 ds <- docomp("count", "pais", "fecha", dfr = temp.p, method = 'slow')
@@ -152,6 +177,9 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios en la ciudad de Trujillo por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
+           label = "Exceso en número de fallecidos por 1000 habitantes:\n- Línea verde: 1\n- Línea naranja: 2\n- Actual: 2.624",
+           color = "blue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-06-13", "%Y-%m-%d"), linetype = 2, 
              color = 3, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-07-01", "%Y-%m-%d"), linetype = 2, 
