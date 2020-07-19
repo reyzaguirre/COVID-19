@@ -270,9 +270,16 @@ ggplot(ds, aes(fecha, pais)) +
              color = 2, size = 1.5)
 
 ###########################################
-temp <- full.nv[full.nv$provincia == "CORONEL PORTILLO" & full.nv$distrito %in% distritos, ]
+temp <- full.nv[full.nv$provincia == "SAN ROMAN" & full.nv$distrito %in% distritos, ]
 temp <- temp[temp$mes <= 6, ]
 temp <- temp[!(temp$mes == 6 & as.numeric(substr(temp$fecha, 9, 10)) > 22), ]
 totales <- table(temp$ano)
 (totales[4] - (totales[3] + totales[2]) / 2) / sum(poblacion) * 1000
 ##############################################
+temp <- full.nv[full.nv$provincia == "SAN ROMAN", ]
+totales <- table(temp$ano)
+(totales[4] - (totales[3] + totales[2]) / 2) / 307.417
+
+temp <- full.nv[full.nv$provincia == "TACNA", ]
+totales <- table(temp$ano)
+(totales[4] - (totales[3] + totales[2]) / 2) / 306.363
