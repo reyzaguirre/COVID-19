@@ -26,8 +26,8 @@ library(httr)
 
 # Leer datos
 
-#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_17072020.xlsx"
-#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_18072020.xlsx"
+GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
@@ -122,7 +122,7 @@ ex$dif <- ex$total20 - ex$media1819
 
 ## 1. Introducción
 
-Los datos del sistema Informático Nacional de Defunciones, SINADEF, pueden descargarse desde [este enlace](http://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp) y cuentan con el registro de defunciones desde el año 2017. En la circunstancia actual, estos datos permiten evaluar el efecto de la epidemia de COVID-19 en el país. Es importante tener en cuenta que podría haber un efecto de cobertura (o falta de cobertura) en los años 2017 y 2018, en donde el número de fallecidos es un `r paste0(format(dif17.19, digits = 3), "%")` y `r paste0(format(dif18.19, digits = 3), "%")` menor que en el 2019 respectivamente. Por esta razón solo se utilizarán como referencia los datos del 2018 y el 2019. Sobre el factor cobertura hay que tener presente también que el número real de fallecimientos anual podría ser por lo menos un [40% mayor](https://www.inei.gob.pe/media/MenuRecursivo/boletines/mortalidad.pdf) a lo registrado por SINADEF.
+Los datos del sistema Informático Nacional de Defunciones, SINADEF, pueden descargarse desde [este enlace](http://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp) y cuentan con el registro de defunciones desde el año 2017. En la circunstancia actual, estos datos permiten evaluar el efecto de la epidemia de COVID-19 en el país. Es importante tener en cuenta que podría haber un efecto de cobertura (o falta de cobertura). En los años 2017 y 2018 el número de fallecidos es un `r paste0(format(dif17.19, digits = 3), "%")` y `r paste0(format(dif18.19, digits = 3), "%")` menor que en el 2019 respectivamente por lo que solo se utilizarán como referencia los datos del 2018 y el 2019. Sobre el factor cobertura, si se considera una tasa de mortalidad para el país de un 5.6 por mil, el número de fallecidos registrados en Sinadef para los años 2018 y 2019 estaría entre un 62% y 64%.
 
 ### Problemas con los datos
 
@@ -738,7 +738,7 @@ ggplot(ds, aes(fecha, pais)) +
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-05-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-06-10", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-18", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## Chanchamayo
 
