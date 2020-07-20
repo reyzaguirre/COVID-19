@@ -26,7 +26,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_18072020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_19072020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -99,7 +99,7 @@ nv.20 <- full.nv[full.nv$ano == 2020, ]
 
 ds <- docomp("count", "pais", c("ano", "prov2"), dfr = full.nv, method = 'slow')
 
-# Calcular exceso acumulado 2020 con respecto al 2019-2018
+# Calcular exceso acumulado 2020
 
 ex <- ds[ds$ano == 2020, 2:3]
 colnames(ex)[2] <- "total20"
@@ -110,19 +110,27 @@ temp <- ds[ds$ano == 2018, 2:3]
 colnames(temp)[2] <- "total18"
 ex <- merge(ex, temp)
 
-# Calcular media 2018 2019
+# Aumentar primeros 70 días 2020 a la línea base
 
-ex$media1819 <- (ex$total19 + ex$total18) / 2
+temp <- full.nv[full.nv$ano == 2020 & full.nv$fecha < "2020-03-11", ]
+ds <- docomp("count", "pais", "prov2", dfr = temp, method = 'slow')
+ds$pais <- ds$pais / 70 * as.numeric(ultimo.fecha - as.Date("2020-01-01"))
+colnames(ds)[2] <- "ajust20"
+ex <- merge(ex, ds, all.x = TRUE)
+
+# Calcular linea base
+
+ex$base <- (ex$ajust20 + ex$total19 + ex$total18) / 3
 
 # Diferencia
 
-ex$dif <- ex$total20 - ex$media1819
+ex$dif <- ex$total20 - ex$base
 
 ```
 
 ## 1. Introducción
 
-Los datos del sistema Informático Nacional de Defunciones, SINADEF, pueden descargarse desde [este enlace](http://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp) y cuentan con el registro de defunciones desde el año 2017. En la circunstancia actual, estos datos permiten evaluar el efecto de la epidemia de COVID-19 en el país. Es importante tener en cuenta que podría haber un efecto de cobertura (o falta de cobertura). En los años 2017 y 2018 el número de fallecidos es un `r paste0(format(dif17.19, digits = 3), "%")` y `r paste0(format(dif18.19, digits = 3), "%")` menor que en el 2019 respectivamente por lo que solo se utilizarán como referencia los datos del 2018 y el 2019. Sobre el factor cobertura, si se considera una tasa de mortalidad para el país de un 5.6 por mil, el número de fallecidos registrados en Sinadef para los años 2018 y 2019 estaría entre un 62% y 64%.
+Los datos del sistema Informático Nacional de Defunciones, SINADEF, pueden descargarse desde [este enlace](http://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp) y cuentan con el registro de defunciones desde el año 2017. En la circunstancia actual, estos datos permiten evaluar el efecto de la epidemia de COVID-19 en el país. Es importante tener en cuenta que podría haber un efecto de cobertura (o falta de cobertura); esto se nota en los años 2017 y 2018 en donde el número de fallecidos es un `r paste0(format(dif17.19, digits = 3), "%")` y `r paste0(format(dif18.19, digits = 3), "%")` menor que en el 2019 respectivamente por lo que solo se utilizarán como referencia los datos del 2018 y el 2019. Para tratar de compensar el posible incremento en cobertura en el año 2020, se utilizará como línea base la media de los años 2018, 2019 y los primeros 70 días del 2020. Sobre el factor cobertura, si se considera una tasa de mortalidad para el país de un 5.6 por mil, el número de fallecidos registrados en Sinadef para los años 2018 y 2019 estaría entre un 62% y 64%.
 
 ### Problemas con los datos
 
@@ -172,7 +180,7 @@ La diferencia a la fecha entre este año y el 2019 es de `r total.nv[4] - total.
 
 ## 3. Evolución del número de fallecidos diarios por causa no violenta en el 2020
 
-Los siguientes gráficos permiten evaluar la evolución de la epidemia a través de su efecto en el número de fallecimientos diarios por causa no violenta, a nivel nacional y en las provincias con mayor población. En algunos de los gráficos se incluye el exceso de fallecidos este año con respecto a la media de los años 2018 y 2019 expresado en número de fallecidos por mil habitantes y una marca para la fecha en la que se llegó a uno, dos y tres fallecidos en exceso por cada mil. Para la población total en todos los casos se toma como referencia la población registrada en el [censo del 2017](https://es.wikipedia.org/wiki/Anexo:Provincias_del_Perú).
+Los siguientes gráficos permiten evaluar la evolución de la epidemia a través de su efecto en el número de fallecimientos diarios por causa no violenta, a nivel nacional y en las provincias con mayor población. En los gráficos se incluye el exceso de fallecidos este año con respecto a la media de los años 2018, 2019 y los primeros 70 días del 2020, expresado en número de fallecidos por mil habitantes y una marca para la fecha en la que se llegó a uno, dos tres y cuatro fallecidos en exceso por cada mil. Para la población total, en todos los casos se toma como referencia la población registrada en el [censo del 2017](https://es.wikipedia.org/wiki/Anexo:Provincias_del_Perú).
 
 ```{r tendencias}
 
@@ -181,7 +189,7 @@ Los siguientes gráficos permiten evaluar la evolución de la epidemia a través
 ds <- docomp("count", "pais", "fecha", dfr = nv.20, method = 'slow')
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
-               format((total.nv[4] - (total.nv[3] + total.nv[2]) / 2) / 31237.385, digits = 4))
+               format((total.nv[4] - (total.nv[3] + total.nv[2] + sum(ex$ajust20, na.rm = TRUE)) / 3) / 31237.385, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -191,7 +199,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-06-18", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 #   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 24, "2020-01-01")) +
 #   geom_smooth(data = ds[ds$fecha < "2020-06-30", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
@@ -214,9 +222,9 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-05-12", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-06-08", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-10", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-17", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-12", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-16", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 #   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 24, "2020-01-01")) +
 #   geom_smooth(data = ds[ds$fecha < "2020-06-23", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
@@ -239,7 +247,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-06-30", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-04", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Trujillo
 
@@ -258,8 +266,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-06-14", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-03", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-17", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-06", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Chiclayo
 
@@ -291,7 +299,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-06-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-31", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Huancayo
 
@@ -328,8 +336,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-05-05", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-05-31", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-06", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-06", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Cusco
 
@@ -366,9 +374,9 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-05-18", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-06-12", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-16", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-14", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-18", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## Ica
 
@@ -387,7 +395,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-06-25", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-27", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Coronel Portillo
 
@@ -406,8 +414,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-05-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-05-17", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-05", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-05-20", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Cajarmarca
 
@@ -433,7 +441,7 @@ temp <- nv.20[nv.20$provincia == "SULLANA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "SULLANA", "dif"] / 311.454, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -444,7 +452,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-06-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-28", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-28", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## San Román
 
@@ -566,7 +575,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-07-09", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-10", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Chincha
 
@@ -585,10 +594,10 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-05-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-06-06", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-06-21", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-25", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-08", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-23", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
 
 ## Puno
 
@@ -643,7 +652,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-07-07", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-05", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Jaen
 
@@ -680,7 +689,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-06-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Huaraz
 
@@ -699,7 +708,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-07-10", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-12", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Morropon
 
@@ -725,7 +734,7 @@ temp <- nv.20[nv.20$provincia == "TUMBES", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "TUMBES", "dif"] / 154.962, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -736,9 +745,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-05-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-06-10", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-18", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-05-28", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-15", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Chanchamayo
 
@@ -1008,7 +1016,7 @@ en 2020 y la media 2018-2019 en el último mes")
 
 ## 5. Efecto COVID-19 y altura
 
-En el siguiente gráfico se observa la relación entre el exceso en el número de fallecidos con respecto a la media del 2018 y 2019 en casos por 1000 habitantes para las provincias más pobladas con la excepción de Chiclayo y Lambayeque (por las razones expuestas en la sección 1 de este documento) y la altitud de la ciudad más poblada de la provincia.
+En el siguiente gráfico se observa la relación entre el exceso en el número de fallecidos con respecto a la media del 2018, 2019 y primeros 70 días del 2020, en casos por 1000 habitantes para las provincias más pobladas con la excepción de Chiclayo y Lambayeque (por las razones expuestas en la sección 1 de este documento) y la altitud de la ciudad más poblada de la provincia.
 
 ```{r altura}
 
@@ -1072,7 +1080,7 @@ a la media 2018-2019 para las provincias más pobladas con relación a su altitu
 
 ```
 
-## 6. Evolución del número de fallecidos diarios por causa no violenta en el 2020 por sexo, edad, y nivel de instrucción
+## 6. Evolución del número de fallecidos por causa no violenta en el 2020 por sexo, edad, y nivel de instrucción
 
 Se sabe que la letalidad de COVID-19 es mayor en hombres que en mujeres y que se incrementa considerablemente con la edad. Se observa también diferencias entre grupos con diferente nivel de instrucción, aunque este efecto podría estar confundido con el sexo, la edad y la zona de residencia (urbano o rural). Los siguientes gráficos permiten evaluar el efecto de la epidemia por sexo, edad y nivel de instrucción en el Perú.
 
@@ -1143,7 +1151,7 @@ temp$grupo[temp$edad < 55] <- "45 a 55"
 temp$grupo[temp$edad < 45] <- "35 a 45"
 temp$grupo[temp$edad < 35] <- "Menor de 35"
 
-# Conteo diario
+# Conteo por semana
 
 ds <- docomp("count", "pais", c("semana", "grupo", "ano"), dfr = temp, method = 'slow')
 

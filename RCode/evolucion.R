@@ -274,12 +274,35 @@ temp <- full.nv[full.nv$provincia == "SAN ROMAN" & full.nv$distrito %in% distrit
 temp <- temp[temp$mes <= 6, ]
 temp <- temp[!(temp$mes == 6 & as.numeric(substr(temp$fecha, 9, 10)) > 22), ]
 totales <- table(temp$ano)
-(totales[4] - (totales[3] + totales[2]) / 2) / sum(poblacion) * 1000
+(totales[4] - (totales[3] + totales[2]) / 2) / sum(poblacion) * 1000 
 ##############################################
-temp <- full.nv[full.nv$provincia == "SAN ROMAN", ]
+temp <- full.nv[full.nv$prov2 == "LIMA Y CALLAO", ]
 totales <- table(temp$ano)
 (totales[4] - (totales[3] + totales[2]) / 2) / 307.417
-
-temp <- full.nv[full.nv$provincia == "TACNA", ]
-totales <- table(temp$ano)
-(totales[4] - (totales[3] + totales[2]) / 2) / 306.363
+##############################################
+ultimo.fecha <- "2020-06-30"
+ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10)) - 1 
+ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
+temp <- full[full$mes <= ultimo.mes, ]
+temp <- temp[!(temp$mes == ultimo.mes & as.numeric(substr(temp$fecha, 9, 10)) > ultimo.dia), ]
+temp$prov2 <- temp$provincia
+temp$prov2[temp$prov2 %in% c("CALLAO", "LIMA")] <- "LIMA Y CALLAO"
+temp <- temp[temp$violenta == "SIN REGISTRO", ]
+total <- table(temp$ano)
+ds <- docomp("count", "pais", c("ano", "prov2"), dfr = temp, method = 'slow')
+ex <- ds[ds$ano == 2020, 2:3]
+colnames(ex)[2] <- "total20"
+tm <- ds[ds$ano == 2019, 2:3]
+colnames(tm)[2] <- "total19"
+ex <- merge(ex, tm)
+tm <- ds[ds$ano == 2018, 2:3]
+colnames(tm)[2] <- "total18"
+ex <- merge(ex, tm)
+tm <- temp[temp$ano == 2020 & temp$fecha < "2020-03-11", ]
+ds <- docomp("count", "pais", "prov2", dfr = tm, method = 'slow')
+ds$pais <- ds$pais / 70 * as.numeric(as.Date(ultimo.fecha) - as.Date("2020-01-01"))
+colnames(ds)[2] <- "ajust20"
+ex <- merge(ex, ds, all.x = TRUE)
+ex$base <- (ex$ajust20 + ex$total19 + ex$total18) / 3
+ex$dif <- ex$total20 - ex$base
+ex[ex$prov2 == "PISCO", "dif"] / 150.744
