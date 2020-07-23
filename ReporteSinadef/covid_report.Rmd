@@ -26,8 +26,8 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_19072020.xlsx"
-GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_21072020.xlsx"
+#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
@@ -859,21 +859,21 @@ ggplot(ds, aes(fecha, pais)) +
 
 ## Chota
 
-temp <- nv.20[nv.20$provincia == "CHOTA", ]
+#temp <- nv.20[nv.20$provincia == "CHOTA", ]
 
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+#ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "CHOTA", "dif"] / 142.984, digits = 4))
+#texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+#               format(ex[ex$prov2 == "CHOTA", "dif"] / 142.984, digits = 4))
 
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Chota por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+#ggplot(ds, aes(fecha, pais)) +
+#  geom_point() +
+#  labs(x = "Fecha", y = "Número de fallecidos diarios",
+#       title = "Fallecidos diarios en la provincia de Chota por causa no violenta") + 
+#  ylim(0, NA) +
+#  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+#  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
+#           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
 
 ## Andahuaylas
 
@@ -1073,8 +1073,8 @@ ggplot(temp, aes(altitud, exceso)) +
   geom_point() +
   labs(x = "Altitud de la ciudad más poblada (m s.n.m.)",
        y = "Exceso de fallecidos por 1000 habitantes",
-       title = "Exceso de fallecidos por 1000 habitantes para el año 2020 con respecto
-a la media 2018-2019 para las provincias más pobladas con relación a su altitud") + 
+       title = "Exceso de fallecidos por 1000 habitantes para el año 2020
+para las provincias más pobladas con relación a su altitud") + 
   geom_text_repel(label = temp$provincia) +
   geom_smooth(method = "lm", se = FALSE)
 
@@ -1140,20 +1140,21 @@ ggplot(dc, aes(fecha, ratio, colour = Sexo)) +
 
 # Limpiar solo edad en anos
 
-temp <- full.nv[full.nv$unidad == "AÑOS", ]
+temp.e <- full.nv[full.nv$unidad == "AÑOS" & full.nv$edad != "SIN REGISTRO", ]
+temp.e$edad <- as.numeric(temp.e$edad)
 
-# Grupos
+# Grupos para tendencia
 
-temp$grupo <- "Mayor de 75"
-temp$grupo[temp$edad < 75] <- "65 a 75"
-temp$grupo[temp$edad < 65] <- "55 a 65"
-temp$grupo[temp$edad < 55] <- "45 a 55"
-temp$grupo[temp$edad < 45] <- "35 a 45"
-temp$grupo[temp$edad < 35] <- "Menor de 35"
+temp.e$grupo <- "75 y más"
+temp.e$grupo[temp.e$edad < 75] <- "65 a 74"
+temp.e$grupo[temp.e$edad < 65] <- "55 a 64"
+temp.e$grupo[temp.e$edad < 55] <- "45 a 54"
+temp.e$grupo[temp.e$edad < 45] <- "35 a 44"
+temp.e$grupo[temp.e$edad < 35] <- "0 a 35"
 
 # Conteo por semana
 
-ds <- docomp("count", "pais", c("semana", "grupo", "ano"), dfr = temp, method = 'slow')
+ds <- docomp("count", "pais", c("semana", "grupo", "ano"), dfr = temp.e, method = 'fast')
 
 # Datos por año
 
@@ -1180,7 +1181,7 @@ dc$ratio <- dc$total20 / dc$media1819
 
 # Grafico
 
-niveles <- c("55 a 65", "65 a 75", "45 a 55", "35 a 45", "Mayor de 75", "Menor de 35")
+niveles <- c("55 a 64", "65 a 74", "45 a 54", "35 a 44", "75 y más", "0 a 35")
 dc$`Grupo de edad` <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(semana, ratio, colour = `Grupo de edad`)) +
@@ -1191,6 +1192,80 @@ ggplot(dc, aes(semana, ratio, colour = `Grupo de edad`)) +
        title = "Número de fallecidos semanales a nivel nacional por causa no violenta
 según grupo de edad") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+# Limpiar solo hombres y mujeres
+
+temp.e <- temp.e[temp.e$sexo == "FEMENINO" | temp.e$sexo == "MASCULINO", ]
+
+# Grupos para mortalidad
+
+temp.e$grupo <- "80 y más"
+temp.e$grupo[temp.e$edad < 80] <- "75 a 79"
+temp.e$grupo[temp.e$edad < 75] <- "70 a 74"
+temp.e$grupo[temp.e$edad < 70] <- "65 a 69"
+temp.e$grupo[temp.e$edad < 65] <- "60 a 64"
+temp.e$grupo[temp.e$edad < 60] <- "55 a 59"
+temp.e$grupo[temp.e$edad < 55] <- "50 a 54"
+temp.e$grupo[temp.e$edad < 50] <- "45 a 49"
+temp.e$grupo[temp.e$edad < 45] <- "40 a 44"
+temp.e$grupo[temp.e$edad < 40] <- "35 a 39"
+temp.e$grupo[temp.e$edad < 35] <- "30 a 34"
+temp.e$grupo[temp.e$edad < 30] <- "25 a 29"
+temp.e$grupo[temp.e$edad < 25] <- "20 a 24"
+temp.e$grupo[temp.e$edad < 20] <- "15 a 19"
+temp.e$grupo[temp.e$edad < 15] <- "0 a 14"
+
+temp.e$grupo <- factor(temp.e$grupo, ordered = TRUE,
+                       levels = c("0 a 14", "15 a 19", "20 a 24", "25 a 29", "30 a 34",
+                                  "35 a 39", "40 a 44", "45 a 49", "50 a 54", "55 a 59",
+                                  "60 a 64", "65 a 69", "70 a 74", "75 a 79", "80 y más"))
+
+# Conteo por grupo y sexo
+
+ds <- docomp("count", "pais", c("sexo", "grupo", "ano"), dfr = temp.e, method = 'fast')
+
+# Datos por año
+
+dc <- ds[ds$ano == 2020, -3]
+colnames(dc)[3] <- "total20"
+temp <- ds[ds$ano == 2019, c(1, 2, 4)]
+colnames(temp)[3] <- "total19"
+dc <- merge(dc, temp)
+temp <- ds[ds$ano == 2018, c(1, 2, 4)]
+colnames(temp)[3] <- "total18"
+dc <- merge(dc, temp)
+
+# Calcular media 2018 2019
+
+dc$media1819 <- (dc$total19 + dc$total18) / 2
+
+# Exceso
+
+dc$dif <- dc$total20 - dc$media1819
+
+# Totales
+
+dc$total <- c(1385933 + 1417319 + 1430083, 1420257, 1401017, 1344048, 1233884, 1145477,
+              1034343, 903752, 788241, 658490, 532940, 415647, 311231, 229221, 235076,
+              1445122 + 1473968 + 1483727, 1466289, 1438000, 1371191, 1251238, 1156915,
+              1038422, 899326, 774590, 634510, 501128, 379352, 271687, 186805, 166789)
+
+# Ratio
+
+dc$ratio <- dc$dif / dc$total
+
+# Grafico
+
+dc$grupo2 <- as.numeric(dc$grupo)
+
+ggplot(dc, aes(grupo, ratio, colour = sexo)) +
+  geom_point() +
+  geom_line(aes(grupo2)) +  
+  labs(x = "Edad (en años)",
+       y = "Proporción de fallecidos",
+       name = "Sexo",
+       title = "Estimación de la proporción de fallecidos por COVID-19 según sexo y edad") +
+  theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
 
 ```
 
