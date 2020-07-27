@@ -280,7 +280,7 @@ temp <- full.nv[full.nv$prov2 == "LIMA Y CALLAO", ]
 totales <- table(temp$ano)
 (totales[4] - (totales[3] + totales[2]) / 2) / 307.417
 ##############################################
-ultimo.fecha <- "2020-06-30"
+ultimo.fecha <- "2020-07-23"
 ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10)) - 1 
 ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
 temp <- full[full$mes <= ultimo.mes, ]
@@ -298,11 +298,12 @@ ex <- merge(ex, tm)
 tm <- ds[ds$ano == 2018, 2:3]
 colnames(tm)[2] <- "total18"
 ex <- merge(ex, tm)
-tm <- temp[temp$ano == 2020 & temp$fecha < "2020-03-11", ]
+tm <- temp[temp$ano == 2020 & temp$fecha < "2020-03-31", ]
 ds <- docomp("count", "pais", "prov2", dfr = tm, method = 'slow')
-ds$pais <- ds$pais / 70 * as.numeric(as.Date(ultimo.fecha) - as.Date("2020-01-01"))
+ds$pais <- ds$pais / 90 * as.numeric(as.Date(ultimo.fecha) - as.Date("2020-01-01"))
 colnames(ds)[2] <- "ajust20"
 ex <- merge(ex, ds, all.x = TRUE)
 ex$base <- (ex$ajust20 + ex$total19 + ex$total18) / 3
 ex$dif <- ex$total20 - ex$base
 ex[ex$prov2 == "PISCO", "dif"] / 150.744
+(total[4] - (total[3] + total[2] + sum(ex$ajust20, na.rm = TRUE)) / 3) / 31237.385
