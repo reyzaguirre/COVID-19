@@ -26,8 +26,8 @@ library(httr)
 
 # Leer datos
 
-#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_25072020.xlsx"
-#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_29072020.xlsx"
+GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
@@ -289,18 +289,12 @@ temp <- nv.20[nv.20$provincia == "PIURA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
-               format(ex[ex$prov2 == "PIURA", "dif"] / 799.321, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Piura por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-05-30", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Huancayo
 
@@ -386,7 +380,7 @@ temp <- nv.20[nv.20$provincia == "ICA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "ICA", "dif"] / 391.519, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -397,7 +391,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-06-26", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-26", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-26", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Coronel Portillo
 
@@ -443,19 +438,12 @@ temp <- nv.20[nv.20$provincia == "SULLANA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
-               format(ex[ex$prov2 == "SULLANA", "dif"] / 311.454, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Sullana por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-05-28", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-06-25", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## San Román
 
@@ -530,17 +518,12 @@ temp <- nv.20[nv.20$provincia == "HUAMANGA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "HUAMANGA", "dif"] / 282.194, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Huamanga por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Cañete
 
@@ -548,17 +531,12 @@ temp <- nv.20[nv.20$provincia == "CAÑETE", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "CAÑETE", "dif"] / 240.013, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Cañete por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Huaura
 
@@ -566,18 +544,12 @@ temp <- nv.20[nv.20$provincia == "HUAURA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
-               format(ex[ex$prov2 == "HUAURA", "dif"] / 227.685, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Huaura por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-07-08", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Chincha
 
@@ -662,17 +634,12 @@ temp <- nv.20[nv.20$provincia == "JAEN", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "JAEN", "dif"] / 185.432, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Jaen por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Huaral
 
@@ -813,17 +780,12 @@ temp <- nv.20[nv.20$provincia == "SANCHEZ CARRION", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "SANCHEZ CARRION", "dif"] / 144.405, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Sánchez Carrión por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Barranca
 
@@ -831,17 +793,12 @@ temp <- nv.20[nv.20$provincia == "BARRANCA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "BARRANCA", "dif"] / 144.381, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Barranca por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Talara
 
@@ -849,35 +806,12 @@ temp <- nv.20[nv.20$provincia == "TALARA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "TALARA", "dif"] / 144.150, digits = 4))
-
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Talara por causa no violenta") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
-
-## Chota
-
-#temp <- nv.20[nv.20$provincia == "CHOTA", ]
-
-#ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-
-#texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-#               format(ex[ex$prov2 == "CHOTA", "dif"] / 142.984, digits = 4))
-
-#ggplot(ds, aes(fecha, pais)) +
-#  geom_point() +
-#  labs(x = "Fecha", y = "Número de fallecidos diarios",
-#       title = "Fallecidos diarios en la provincia de Chota por causa no violenta") + 
-#  ylim(0, NA) +
-#  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-#  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-#           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Andahuaylas
 
@@ -1024,16 +958,13 @@ En el siguiente gráfico se observa la relación entre el exceso en el número d
 
 ```{r altura}
 
-prov <- c("Lima y Callao", "Arequipa", "Trujillo", "Piura", "Huancayo", "Maynas",
-          "Cusco", "Santa", "Ica", "Coronel Portillo", "Cajamarca", "Sullana",
-          "San Román", "Tacna", "Huánuco", "Huamanga", "Cañete", "Huaura",
-          "Chincha", "Puno", "Satipo", "San Martín", "Jaen", "Huaral", "Huaraz",
-          "Morropón", "Tumbes", "Chanchamayo", "Pisco", "Sánchez Carrión",
-          "Barranca", "Talara", "Chota", "Andahuaylas")
+prov <- c("Lima y Callao", "Arequipa", "Trujillo", "Huancayo", "Maynas", "Cusco",
+          "Santa", "Ica", "Coronel Portillo", "Cajamarca", "San Román", "Tacna",
+          "Huánuco", "Chincha", "Puno", "Satipo", "San Martín", "Huaral", "Huaraz",
+          "Morropón", "Tumbes", "Chanchamayo", "Pisco", "Andahuaylas")
 exce <- c(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000,
           ex[ex$prov2 == "AREQUIPA", "dif"] / 1080635 * 1000,
           ex[ex$prov2 == "TRUJILLO", "dif"] / 970016 * 1000,
-          ex[ex$prov2 == "PIURA", "dif"] / 799321 * 1000,
           ex[ex$prov2 == "HUANCAYO", "dif"] / 545615 * 1000,
           ex[ex$prov2 == "MAYNAS", "dif"] / 479866 * 1000,
           ex[ex$prov2 == "CUSCO", "dif"] / 447588 * 1000,
@@ -1041,32 +972,22 @@ exce <- c(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000,
           ex[ex$prov2 == "ICA", "dif"] / 391519 * 1000,
           ex[ex$prov2 == "CORONEL PORTILLO", "dif"] / 384168 * 1000,
           ex[ex$prov2 == "CAJAMARCA", "dif"] / 348433 * 1000,
-          ex[ex$prov2 == "SULLANA", "dif"] / 311454 * 1000,
           ex[ex$prov2 == "SAN ROMAN", "dif"] / 307417 * 1000,
           ex[ex$prov2 == "TACNA", "dif"] / 306363 * 1000,
           ex[ex$prov2 == "HUANUCO", "dif"] / 293397 * 1000,
-          ex[ex$prov2 == "HUAMANGA", "dif"] / 282194 * 1000,
-          ex[ex$prov2 == "CAÑETE", "dif"] / 240013 * 1000,
-          ex[ex$prov2 == "HUAURA", "dif"] / 227685 * 1000,
           ex[ex$prov2 == "CHINCHA", "dif"] / 226113 * 1000,
           ex[ex$prov2 == "PUNO", "dif"] / 219494 * 1000,
           ex[ex$prov2 == "SATIPO", "dif"] / 203985 * 1000,
           ex[ex$prov2 == "SAN MARTIN", "dif"] / 193095 * 1000,
-          ex[ex$prov2 == "JAEN", "dif"] / 185432 * 1000,
           ex[ex$prov2 == "HUARAL", "dif"] / 183898 * 1000,
           ex[ex$prov2 == "HUARAZ", "dif"] / 163936 * 1000,
           ex[ex$prov2 == "MORROPON", "dif"] / 162027 * 1000,
           ex[ex$prov2 == "TUMBES", "dif"] / 154962 * 1000,
           ex[ex$prov2 == "CHANCHAMAYO", "dif"] / 151489 * 1000,
           ex[ex$prov2 == "PISCO", "dif"] / 150744 * 1000,
-          ex[ex$prov2 == "SANCHEZ CARRION", "dif"] / 144405 * 1000,
-          ex[ex$prov2 == "BARRANCA", "dif"] / 144381 * 1000,
-          ex[ex$prov2 == "TALARA", "dif"] / 144150 * 1000,
-          ex[ex$prov2 == "CHOTA", "dif"] / 142984 * 1000,
           ex[ex$prov2 == "ANDAHUAYLAS", "dif"] / 142477 * 1000)
-alti <- c(161, 2335, 34, 36, 3246, 105, 3399, 5, 406, 154, 2750, 65, 3824,
-          562, 1898, 2761, 40, 30, 97, 3810, 631, 350, 729, 188, 3052, 92,
-          6, 751, 17, 3175, 56, 15, 2388, 2836)
+alti <- c(161, 2335, 34, 3246, 105, 3399, 5, 406, 154, 2750, 3824, 562, 1898,
+          97, 3810, 631, 350, 188, 3052, 92, 6, 751, 17, 2836)
 
 temp <- data.frame(provincia = prov,
                    exceso = exce,
@@ -1196,6 +1117,10 @@ ggplot(dc, aes(semana, ratio, colour = `Grupo de edad`)) +
        title = "Número de fallecidos semanales a nivel nacional por causa no violenta
 según grupo de edad") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
+
+```
+
+```{r riesgo}
 
 # Limpiar solo hombres y mujeres
 
