@@ -7,7 +7,6 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
-
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 options(stringsAsFactors = FALSE)
@@ -19,14 +18,13 @@ library(st4gi)
 library(reshape)
 library(readxl) 
 library(httr)
-
 ```
 
 ```{r datos, include = FALSE}
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_29072020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_05082020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -420,7 +418,7 @@ temp <- nv.20[nv.20$provincia == "CAJAMARCA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "CAJAMARCA", "dif"] / 348.433, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -430,7 +428,8 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
+  geom_vline(xintercept = as.Date("2020-08-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Sullana
 
@@ -704,7 +703,7 @@ temp <- nv.20[nv.20$provincia == "TUMBES", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "TUMBES", "dif"] / 154.962, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -716,7 +715,8 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-05-27", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-06-14", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-14", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-03", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## Chanchamayo
 
@@ -724,7 +724,7 @@ temp <- nv.20[nv.20$provincia == "CHANCHAMAYO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "CHANCHAMAYO", "dif"] / 151.489, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -734,7 +734,8 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
+  geom_vline(xintercept = as.Date("2020-08-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Pisco
 
