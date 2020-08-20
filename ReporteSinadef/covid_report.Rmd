@@ -24,8 +24,8 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_05082020.xlsx"
-GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_19082020.xlsx"
+#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
@@ -186,7 +186,7 @@ Los siguientes gráficos permiten evaluar la evolución de la epidemia a través
 
 ds <- docomp("count", "pais", "fecha", dfr = nv.20, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format((total.nv[4] - (total.nv[3] + total.nv[2] + sum(ex$ajust20, na.rm = TRUE)) / 3) / 31237.385, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -197,7 +197,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 #   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 24, "2020-01-01")) +
 #   geom_smooth(data = ds[ds$fecha < "2020-06-30", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
@@ -209,7 +210,7 @@ temp <- nv.20[nv.20$provincia %in% c("CALLAO", "LIMA"), ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Actual:",
                format(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569.468, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -222,7 +223,8 @@ ggplot(ds, aes(fecha, pais)) +
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
   geom_vline(xintercept = as.Date("2020-05-17", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-06-13", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
 
 #   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 24, "2020-01-01")) +
 #   geom_smooth(data = ds[ds$fecha < "2020-06-23", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
@@ -234,7 +236,7 @@ temp <- nv.20[nv.20$provincia == "AREQUIPA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "AREQUIPA", "dif"] / 1080.635, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -246,7 +248,8 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
   geom_vline(xintercept = as.Date("2020-07-04", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-21", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-21", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-07", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## Trujillo
 
@@ -254,7 +257,7 @@ temp <- nv.20[nv.20$provincia == "TRUJILLO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "TRUJILLO", "dif"] / 970.016, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -266,7 +269,8 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-06-17", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-06", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-06", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-06", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## Chiclayo
 
@@ -339,7 +343,7 @@ temp <- nv.20[nv.20$provincia == "CUSCO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "CUSCO", "dif"] / 447.588, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -349,7 +353,8 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
+  geom_vline(xintercept = as.Date("2020-08-13", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Santa
 
@@ -450,7 +455,7 @@ temp <- nv.20[nv.20$provincia == "SAN ROMAN", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "SAN ROMAN", "dif"] / 307.417, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -460,7 +465,8 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
+  geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Tacna
 
@@ -499,7 +505,7 @@ temp <- nv.20[nv.20$provincia == "HUANUCO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "HUANUCO", "dif"] / 293.397, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -509,7 +515,8 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
+  geom_vline(xintercept = as.Date("2020-08-14", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Huamanga
 
@@ -578,7 +585,7 @@ temp <- nv.20[nv.20$provincia == "PUNO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "PUNO", "dif"] / 219.494, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -588,7 +595,8 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
+  geom_vline(xintercept = as.Date("2020-08-15", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Satipo
 
@@ -614,7 +622,7 @@ temp <- nv.20[nv.20$provincia == "SAN MARTIN", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "SAN MARTIN", "dif"] / 193.095, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -625,7 +633,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-06-28", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-28", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-09", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Jaen
 
@@ -665,7 +674,7 @@ temp <- nv.20[nv.20$provincia == "HUARAZ", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "HUARAZ", "dif"] / 163.936, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -676,7 +685,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-07-12", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-12", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-09", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Morropon
 
