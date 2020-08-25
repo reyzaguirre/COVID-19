@@ -307,3 +307,52 @@ ex$base <- (ex$ajust20 + ex$total19 + ex$total18) / 3
 ex$dif <- ex$total20 - ex$base
 ex[ex$prov2 == "PISCO", "dif"] / 150.744
 (total[4] - (total[3] + total[2] + sum(ex$ajust20, na.rm = TRUE)) / 3) / 31237.385
+
+###############################################################################
+## Pronostico Peru
+
+ds <- docomp("count", "pais", "fecha", dfr = nv.20, method = 'slow')
+
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+               format((total.nv[4] - (total.nv[3] + total.nv[2] + sum(ex$ajust20, na.rm = TRUE)) / 3) / 31237.385, digits = 4))
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios a nivel nacional por causa no violenta") +
+  ylim(0, NA) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 50, "2020-01-01")) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + 
+  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
+  geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+
+#   geom_smooth(data = ds[ds$fecha < "2020-06-30", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
+#   geom_smooth(data = ds[ds$fecha < "2020-07-06", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 4) # azul
+
+###############################################################################
+## Pronostico Lima
+
+temp <- nv.20[nv.20$provincia %in% c("CALLAO", "LIMA"), ]
+
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Actual:",
+               format(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569.468, digits = 4))
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta") + 
+  ylim(0, NA) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 50, "2020-01-01")) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + 
+  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
+  geom_vline(xintercept = as.Date("2020-05-17", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-06-13", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
+
+#   geom_smooth(data = ds[ds$fecha < "2020-06-23", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
+#   geom_smooth(data = ds[ds$fecha < "2020-06-29", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 4) # azul

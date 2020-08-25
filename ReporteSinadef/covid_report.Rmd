@@ -24,8 +24,8 @@ library(httr)
 
 # Leer datos
 
-#url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_19082020.xlsx"
-#GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_23082020.xlsx"
+GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
@@ -200,10 +200,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 24, "2020-01-01")) +
-#   geom_smooth(data = ds[ds$fecha < "2020-06-30", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
-#   geom_smooth(data = ds[ds$fecha < "2020-07-06", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 4) # azul
-
 ## Lima y Callao
 
 temp <- nv.20[nv.20$provincia %in% c("CALLAO", "LIMA"), ]
@@ -225,10 +221,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-06-13", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
-
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 24, "2020-01-01")) +
-#   geom_smooth(data = ds[ds$fecha < "2020-06-23", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + # rojo
-#   geom_smooth(data = ds[ds$fecha < "2020-06-29", ], method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 4) # azul
 
 ## Arequipa
 
@@ -304,7 +296,7 @@ temp <- nv.20[nv.20$provincia == "HUANCAYO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "HUANCAYO", "dif"] / 545.615, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -315,7 +307,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-07-22", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-22", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-22", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Maynas
 
@@ -655,7 +648,7 @@ temp <- nv.20[nv.20$provincia == "HUARAL", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "HUARAL", "dif"] / 183.898, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -666,7 +659,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-06-18", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-06-18", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-08-21", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Huaraz
 
@@ -1287,7 +1281,7 @@ dc <- dc[dc$semana < max(dc$semana), ]
 
 # Grafico
 
-niveles <- c("Secundaria", "Superior", "Primaria", "Ninguna")
+niveles <- c("Superior", "Secundaria", "Primaria", "Ninguna")
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(semana, ratio, colour = Instrucción)) +
