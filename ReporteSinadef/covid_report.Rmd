@@ -24,7 +24,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_24082020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_31082020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -233,7 +233,8 @@ ggplot(ds, aes(fecha, pais)) +
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta y pronóstico a 30 días") + 
+       title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta
+y pronóstico a 30 días") + 
   ylim(0, NA) +
   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 30, "2020-01-01")) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
@@ -1261,7 +1262,7 @@ dc <- dc[dc$semana < max(dc$semana), ]
 
 # Grafico
 
-niveles <- c("Secundaria", "Superior", "Primaria", "Ninguna")
+niveles <- c("Superior", "Secundaria", "Primaria", "Ninguna")
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(semana, ratio, colour = Instrucción)) +
