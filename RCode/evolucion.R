@@ -320,7 +320,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios a nivel nacional por causa no violenta") +
   ylim(0, NA) +
-  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 50, "2020-01-01")) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 26, "2020-01-01")) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + 
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
@@ -345,7 +345,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta") + 
   ylim(0, NA) +
-  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 50, "2020-01-01")) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 26, "2020-01-01")) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2) + 
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +

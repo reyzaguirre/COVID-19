@@ -24,7 +24,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_31082020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_13092020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -203,9 +203,9 @@ ggplot(ds, aes(fecha, pais)) +
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios a nivel nacional por causa no violenta y pronóstico a 30 días") +
+       title = "Fallecidos diarios a nivel nacional por causa no violenta y pronóstico a 7 días") +
   ylim(0, NA) +
-  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 30, "2020-01-01")) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
 
 ## Lima y Callao
@@ -234,9 +234,9 @@ ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta
-y pronóstico a 30 días") + 
+y pronóstico a 7 días") + 
   ylim(0, NA) +
-  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 30, "2020-01-01")) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
 
 ## Arequipa
@@ -393,7 +393,7 @@ temp <- nv.20[nv.20$provincia == "ICA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "ICA", "dif"] / 391.519, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -405,7 +405,8 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-06-26", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-26", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-26", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-09-02", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## Coronel Portillo
 
@@ -484,7 +485,7 @@ temp <- nv.20[nv.20$provincia == "TACNA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "TACNA", "dif"] / 306.363, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -494,7 +495,8 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
+           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
+  geom_vline(xintercept = as.Date("2020-08-30", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Lambayeque
 
@@ -573,7 +575,7 @@ temp <- nv.20[nv.20$provincia == "CHINCHA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Línea gris: 5\n- Actual:",
                format(ex[ex$prov2 == "CHINCHA", "dif"] / 226.113, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -587,7 +589,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-05-25", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-06-08", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-06-22", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-09-12", "%Y-%m-%d"), linetype = 2, color = 8, size = 1.5)
 
 ## Puno
 
@@ -764,7 +767,7 @@ temp <- nv.20[nv.20$provincia == "PISCO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "PISCO", "dif"] / 150.744, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -776,7 +779,8 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-07-01", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-23", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-23", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-09-02", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## La Convención
 
@@ -795,19 +799,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
-
-## Sánchez Carrión
-
-temp <- nv.20[nv.20$provincia == "SANCHEZ CARRION", ]
-
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Sánchez Carrión por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
 ## Barranca
 
@@ -835,19 +826,19 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-## Andahuaylas
+## Abancay
 
-temp <- nv.20[nv.20$provincia == "ANDAHUAYLAS", ]
+temp <- nv.20[nv.20$provincia == "ABANCAY", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "ANDAHUAYLAS", "dif"] / 142.477, digits = 4))
+               format(ex[ex$prov2 == "ABANCAY", "dif"] / 110.520, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Andahuaylas por causa no violenta") + 
+       title = "Fallecidos diarios en la provincia de Abancay por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
@@ -983,7 +974,7 @@ En el siguiente gráfico se observa la relación entre el exceso en el número d
 prov <- c("Lima y Callao", "Arequipa", "Trujillo", "Huancayo", "Maynas", "Cusco",
           "Santa", "Ica", "Coronel Portillo", "Cajamarca", "San Román", "Tacna",
           "Huánuco", "Chincha", "Puno", "Satipo", "San Martín", "Huaral", "Huaraz",
-          "Morropón", "Tumbes", "Chanchamayo", "Pisco", "Andahuaylas")
+          "Morropón", "Tumbes", "Chanchamayo", "Pisco", "Abancay")
 exce <- c(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000,
           ex[ex$prov2 == "AREQUIPA", "dif"] / 1080635 * 1000,
           ex[ex$prov2 == "TRUJILLO", "dif"] / 970016 * 1000,
@@ -1007,9 +998,9 @@ exce <- c(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569468 * 1000,
           ex[ex$prov2 == "TUMBES", "dif"] / 154962 * 1000,
           ex[ex$prov2 == "CHANCHAMAYO", "dif"] / 151489 * 1000,
           ex[ex$prov2 == "PISCO", "dif"] / 150744 * 1000,
-          ex[ex$prov2 == "ANDAHUAYLAS", "dif"] / 142477 * 1000)
+          ex[ex$prov2 == "ABANCAY", "dif"] / 110520 * 1000)
 alti <- c(161, 2335, 34, 3246, 105, 3399, 5, 406, 154, 2750, 3824, 562, 1898,
-          97, 3810, 631, 350, 188, 3052, 92, 6, 751, 17, 2836)
+          97, 3810, 631, 350, 188, 3052, 92, 6, 751, 17, 2500)
 
 temp <- data.frame(provincia = prov,
                    exceso = exce,
@@ -1128,7 +1119,8 @@ dc$ratio <- dc$total20 / dc$media1819
 
 # Grafico
 
-niveles <- c("55 a 64", "65 a 74", "45 a 54", "35 a 44", "75 y más", "0 a 35")
+niveles <- c("75 y más", "65 a 74", "55 a 64", "45 a 54", "35 a 44", "0 a 35")
+
 dc$`Grupo de edad` <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(semana, ratio, colour = `Grupo de edad`)) +
@@ -1263,6 +1255,7 @@ dc <- dc[dc$semana < max(dc$semana), ]
 # Grafico
 
 niveles <- c("Superior", "Secundaria", "Primaria", "Ninguna")
+
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(semana, ratio, colour = Instrucción)) +
@@ -1298,7 +1291,6 @@ dc <- dc[dc$semana < max(dc$semana), ]
 
 # Grafico
 
-niveles <- c("Superior", "Secundaria", "Primaria", "Ninguna")
 dc$Instrucción <- factor(dc$grupo, levels = niveles, ordered = TRUE)
 
 ggplot(dc, aes(semana, ratio, colour = Instrucción)) +
