@@ -24,7 +24,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_13092020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_25092020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -200,13 +200,13 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios a nivel nacional por causa no violenta y pronóstico a 7 días") +
-  ylim(0, NA) +
-  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios a nivel nacional por causa no violenta y pronóstico a 7 días") +
+#   ylim(0, NA) +
+#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
 
 ## Lima y Callao
 
@@ -230,14 +230,14 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
 
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta
-y pronóstico a 7 días") + 
-  ylim(0, NA) +
-  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta
+# y pronóstico a 7 días") + 
+#   ylim(0, NA) +
+#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
 
 ## Arequipa
 
@@ -353,7 +353,7 @@ temp <- nv.20[nv.20$provincia == "CUSCO", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "CUSCO", "dif"] / 447.588, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -364,7 +364,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-08-13", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-08-13", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-09-24", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Santa
 
@@ -813,16 +814,16 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
-## Talara
+## Huancavelica
 
-temp <- nv.20[nv.20$provincia == "TALARA", ]
+temp <- nv.20[nv.20$provincia == "HUANCAVELICA", ]
 
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Talara por causa no violenta") + 
+       title = "Fallecidos diarios en la provincia de Huancavelica por causa no violenta") + 
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
 
