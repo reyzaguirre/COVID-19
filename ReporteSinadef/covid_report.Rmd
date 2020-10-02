@@ -24,7 +24,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_25092020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_30092020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -50,12 +50,13 @@ full <- full[full$pais == "PERU", ]
 # Identificar ultimo dia
 
 ultimo.fecha <- max(full$fecha)
-ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10)) - 1 
-ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
+ultimo.dia <- as.numeric(substr(ultimo.fecha - 1, 9, 10))
+ultimo.mes <- as.numeric(substr(ultimo.fecha - 1, 6, 7))
 
-ultimo.mes.texto <- c("enero", "febrero", "marzo", "abril", "mayo", "junio",
-                      "julio", "agosto", "septiembre", "octubre", "noviembre",
-                      "diciembre")[ultimo.mes]
+lista.meses <- c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+                 "agosto", "septiembre", "octubre", "noviembre", "diciembre")
+
+ultimo.mes.texto <- lista.meses[ultimo.mes]
 
 # Diferencias 2017, 2018, 2019
 
@@ -176,6 +177,21 @@ text(x = xx, y = total.nv, label = total.nv, pos = 3, cex = 0.8)
 
 La diferencia a la fecha entre este año y el 2019 es de `r total.nv[4] - total.nv[3]` para el número de fallecidos por causa no violenta.
 
+```{r barras_6_meses}
+
+temp <- full[(full$fecha >= "2020-04-01" & full$fecha <= "2020-09-30") | (full$fecha >= "2019-04-01" & full$fecha <= "2019-09-30"), ]
+
+total <- table(temp$ano)
+
+xx <- barplot(height = total,
+              las = 1, xlab = "Año", ylim = c(0, max(total)*1.1),
+              main = "Número de fallecidos registrados total a nivel nacional
+entre el 1 de abril hasta el 30 de septiembre")
+
+text(x = xx, y = total, label = total, pos = 3, cex = 0.8)
+
+```
+
 ## 3. Evolución del número de fallecidos diarios por causa no violenta en el 2020
 
 Los siguientes gráficos permiten evaluar la evolución de la epidemia a través de su efecto en el número de fallecimientos diarios por causa no violenta, a nivel nacional y en las provincias con mayor población. En los gráficos se incluye el exceso de fallecidos este año con respecto a la media de los años 2018, 2019 y los primeros 70 días del 2020, expresado en número de fallecidos por mil habitantes y una marca para la fecha en la que se llegó a uno, dos tres y cuatro fallecidos en exceso por cada mil. Para la población total, en todos los casos se toma como referencia la población registrada en el [censo del 2017](https://es.wikipedia.org/wiki/Anexo:Provincias_del_Perú).
@@ -200,13 +216,13 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
-# ggplot(ds, aes(fecha, pais)) +
-#   geom_point() +
-#   labs(x = "Fecha", y = "Número de fallecidos diarios",
-#        title = "Fallecidos diarios a nivel nacional por causa no violenta y pronóstico a 7 días") +
-#   ylim(0, NA) +
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
-#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios a nivel nacional por causa no violenta y pronóstico a 7 días") +
+  ylim(0, NA) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
 
 ## Lima y Callao
 
@@ -230,14 +246,14 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
 
-# ggplot(ds, aes(fecha, pais)) +
-#   geom_point() +
-#   labs(x = "Fecha", y = "Número de fallecidos diarios",
-#        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta
-# y pronóstico a 7 días") + 
-#   ylim(0, NA) +
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
-#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta
+ y pronóstico a 7 días") + 
+  ylim(0, NA) +
+  xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE, color = 2)
 
 ## Arequipa
 
@@ -855,8 +871,7 @@ En los siguientes gráficos se observan las 20 provincias y 40 distritos con may
 
 # Seleccionar ultimo mes
 
-temp <- full.nv[full.nv$mes %in% c(ultimo.mes - 1, ultimo.mes), ]
-temp <- temp[!(temp$mes == (ultimo.mes - 1) & as.numeric(substr(temp$fecha, 9, 10)) < ultimo.dia), ]
+temp <- full.nv[full.nv$fecha %in% (ultimo.fecha - 30):ultimo.fecha, ]
 
 # Conteo diario provincia
 
