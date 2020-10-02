@@ -15,7 +15,6 @@ options(digits = 4)
 library(ggplot2)
 library(ggrepel)
 library(st4gi)
-library(reshape)
 library(readxl) 
 library(httr)
 ```
@@ -24,7 +23,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_30092020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_01102020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -177,7 +176,7 @@ text(x = xx, y = total.nv, label = total.nv, pos = 3, cex = 0.8)
 
 La diferencia a la fecha entre este año y el 2019 es de `r total.nv[4] - total.nv[3]` para el número de fallecidos por causa no violenta.
 
-```{r barras_6_meses}
+```{r barras_6_meses, eval = FALSE}
 
 temp <- full[(full$fecha >= "2020-04-01" & full$fecha <= "2020-09-30") | (full$fecha >= "2019-04-01" & full$fecha <= "2019-09-30"), ]
 
@@ -871,7 +870,12 @@ En los siguientes gráficos se observan las 20 provincias y 40 distritos con may
 
 # Seleccionar ultimo mes
 
-temp <- full.nv[full.nv$fecha %in% (ultimo.fecha - 30):ultimo.fecha, ]
+ultimo.fecha.18 <- as.Date(paste0("2018-", as.character(substr(ultimo.fecha, 6, 10))), "%Y-%m-%d")
+ultimo.fecha.19 <- as.Date(paste0("2019-", as.character(substr(ultimo.fecha, 6, 10))), "%Y-%m-%d")
+intervalo <- c((ultimo.fecha.18 - 30):ultimo.fecha.18,
+               (ultimo.fecha.19 - 30):ultimo.fecha.19,
+               (ultimo.fecha - 30):ultimo.fecha)
+temp <- full.nv[full.nv$fecha %in% intervalo, ]
 
 # Conteo diario provincia
 
