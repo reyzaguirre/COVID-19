@@ -14,7 +14,6 @@ options(digits = 4)
 
 library(ggplot2)
 library(st4gi)
-library(reshape)
 library(readxl) 
 library(httr)
 ```
