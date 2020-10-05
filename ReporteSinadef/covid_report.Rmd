@@ -3,7 +3,9 @@ title: "Seguimiento del número de fallecimientos diarios en el Perú"
 subtitle: "Datos del Sistema Informático Nacional de Defunciones, SINADEF"
 author: "Raúl Eyzaguirre"
 date: '`r format(Sys.time(), "%d/%m/%Y")`'
-output: html_document
+output: 
+  html_document:
+    toc: true
 ---
 
 ```{r setup, include = FALSE}
@@ -23,7 +25,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_01102020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_04102020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
