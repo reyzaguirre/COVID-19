@@ -25,7 +25,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_04102020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_07102020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -799,68 +799,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-07-01", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-07-23", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-09-02", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
-
-## La Convención
-
-temp <- nv.20[nv.20$provincia == "LA CONVENCION", ]
-
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "LA CONVENCION", "dif"] / 147.148, digits = 4))
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de La Convención por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
-
-## Barranca
-
-temp <- nv.20[nv.20$provincia == "BARRANCA", ]
-
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Barranca por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
-
-## Huancavelica
-
-temp <- nv.20[nv.20$provincia == "HUANCAVELICA", ]
-
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Huancavelica por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'))
-
-## Abancay
-
-temp <- nv.20[nv.20$provincia == "ABANCAY", ]
-
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
-               format(ex[ex$prov2 == "ABANCAY", "dif"] / 110.520, digits = 4))
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en la provincia de Abancay por causa no violenta") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
-  annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
-           label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)
 
 ```
 
