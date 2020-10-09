@@ -388,7 +388,7 @@ ggplot(ds, aes(fecha, pais)) +
 
 ```
 
-## 4. Evolución del número de fallecidos diarios por provincia (más de 200000 habitantes)
+## 4. Evolución del número de fallecidos diarios por provincia (más de 150000 habitantes)
 
 ```{r provincia}
 
@@ -443,6 +443,19 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   geom_hline(yintercept = 240013 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+## Chanchamayo
+
+temp <- full[full$provincia == "CHANCHAMAYO", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Chanchamayo (Junin)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 151489 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Chiclayo
 
@@ -548,6 +561,32 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   geom_hline(yintercept = 293397 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
+## Huaral
+
+temp <- full[full$provincia == "HUARAL", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Huaral (Lima)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 183898 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+## Huaraz
+
+temp <- full[full$provincia == "HUARAZ", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Huaraz (Ancash)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 163936 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
 ## Ica
 
 temp <- full[full$provincia == "ICA", ]
@@ -560,6 +599,19 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   geom_hline(yintercept = 391519 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+## Jaén
+
+temp <- full[full$provincia == "JAEN", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Jaén (Cajamarca)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 185432 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Lambayeque
 
@@ -600,6 +652,32 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   geom_hline(yintercept = 479866 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
+## Morropón
+
+temp <- full[full$provincia == "MORROPON", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Morropón (Piura)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 162027 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+## Pisco
+
+temp <- full[full$provincia == "PISCO", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Pisco (Ica)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 150744 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
 ## Piura
 
 temp <- full[full$provincia == "PIURA", ]
@@ -625,6 +703,19 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   geom_hline(yintercept = 219494 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+## San Martín
+
+temp <- full[full$provincia == "SAN MARTIN", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de San Martín (San Martín)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 193095 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## San Román
 
@@ -703,6 +794,19 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   geom_hline(yintercept = 970016 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+## Tumbes
+
+temp <- full[full$provincia == "TUMBES", ]
+ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+
+ggplot(ds, aes(fecha, pais)) +
+  geom_point() +
+  labs(x = "Fecha", y = "Número de fallecidos diarios",
+       title = "Fallecidos diarios en la provincia de Tumbes (Tumbes)") + 
+  ylim(0, NA) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
+  geom_hline(yintercept = 154962 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ```
 
