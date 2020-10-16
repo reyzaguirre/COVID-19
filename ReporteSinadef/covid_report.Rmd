@@ -25,7 +25,7 @@ library(httr)
 
 # Leer datos
 
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_12102020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_15102020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
@@ -48,16 +48,19 @@ full$semana <- as.numeric(strftime(full$fecha, format = "%V"))
 
 full <- full[full$pais == "PERU", ]
 
-# Identificar ultimo dia
+# Identificar último día (eliminar último día de registro)
 
-ultimo.fecha <- max(full$fecha)
-ultimo.dia <- as.numeric(substr(ultimo.fecha - 1, 9, 10))
-ultimo.mes <- as.numeric(substr(ultimo.fecha - 1, 6, 7))
+ultimo.fecha <- max(full$fecha) - 1
+ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10))
+ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
 
 lista.meses <- c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
                  "agosto", "septiembre", "octubre", "noviembre", "diciembre")
 
 ultimo.mes.texto <- lista.meses[ultimo.mes]
+
+ff <- data.frame(fecha = seq(as.Date("2020-01-01", "%Y-%m-%d"), ultimo.fecha, by = "day"),
+                 pais = 0)
 
 # Diferencias 2017, 2018, 2019
 
@@ -228,8 +231,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Lima y Callao
 
 temp <- nv.20[nv.20$provincia %in% c("CALLAO", "LIMA"), ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Actual:",
                format(ex[ex$prov2 == "LIMA Y CALLAO", "dif"] / 9569.468, digits = 4))
@@ -259,8 +262,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Arequipa
 
 temp <- nv.20[nv.20$provincia == "AREQUIPA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Actual:",
                format(ex[ex$prov2 == "AREQUIPA", "dif"] / 1080.635, digits = 4))
@@ -281,8 +284,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Trujillo
 
 temp <- nv.20[nv.20$provincia == "TRUJILLO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "TRUJILLO", "dif"] / 970.016, digits = 4))
@@ -302,8 +305,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Chiclayo
 
 temp <- nv.20[nv.20$provincia == "CHICLAYO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -315,8 +318,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Piura
 
 temp <- nv.20[nv.20$provincia == "PIURA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -328,8 +331,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Huancayo
 
 temp <- nv.20[nv.20$provincia == "HUANCAYO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "HUANCAYO", "dif"] / 545.615, digits = 4))
@@ -348,8 +351,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Maynas
 
 temp <- nv.20[nv.20$provincia == "MAYNAS", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "MAYNAS", "dif"] / 479.866, digits = 4))
@@ -368,8 +371,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Cusco
 
 temp <- nv.20[nv.20$provincia == "CUSCO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "CUSCO", "dif"] / 447.588, digits = 4))
@@ -388,10 +391,10 @@ ggplot(ds, aes(fecha, pais)) +
 ## Santa
 
 temp <- nv.20[nv.20$provincia == "SANTA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Actual:",
                format(ex[ex$prov2 == "SANTA", "dif"] / 435.807, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -404,13 +407,14 @@ ggplot(ds, aes(fecha, pais)) +
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-05-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-06-15", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-07-20", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-20", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-10-14", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5)
 
 ## Ica
 
 temp <- nv.20[nv.20$provincia == "ICA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "ICA", "dif"] / 391.519, digits = 4))
@@ -430,8 +434,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Coronel Portillo
 
 temp <- nv.20[nv.20$provincia == "CORONEL PORTILLO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "CORONEL PORTILLO", "dif"] / 384.168, digits = 4))
@@ -450,10 +454,10 @@ ggplot(ds, aes(fecha, pais)) +
 ## Cajarmarca
 
 temp <- nv.20[nv.20$provincia == "CAJAMARCA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "CAJAMARCA", "dif"] / 348.433, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -464,13 +468,14 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-08-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-08-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-10-10", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Sullana
 
 temp <- nv.20[nv.20$provincia == "SULLANA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -482,8 +487,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## San Román
 
 temp <- nv.20[nv.20$provincia == "SAN ROMAN", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "SAN ROMAN", "dif"] / 307.417, digits = 4))
@@ -501,8 +506,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Tacna
 
 temp <- nv.20[nv.20$provincia == "TACNA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "TACNA", "dif"] / 306.363, digits = 4))
@@ -520,8 +525,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Lambayeque
 
 temp <- nv.20[nv.20$provincia == "LAMBAYEQUE", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -533,8 +538,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Huanuco
 
 temp <- nv.20[nv.20$provincia == "HUANUCO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "HUANUCO", "dif"] / 293.397, digits = 4))
@@ -552,8 +557,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Huamanga
 
 temp <- nv.20[nv.20$provincia == "HUAMANGA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -565,8 +570,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Cañete
 
 temp <- nv.20[nv.20$provincia == "CAÑETE", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -578,8 +583,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Huaura
 
 temp <- nv.20[nv.20$provincia == "HUAURA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -591,8 +596,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Chincha
 
 temp <- nv.20[nv.20$provincia == "CHINCHA", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Línea roja: 4\n- Línea gris: 5\n- Actual:",
                format(ex[ex$prov2 == "CHINCHA", "dif"] / 226.113, digits = 4))
@@ -614,8 +619,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Puno
 
 temp <- nv.20[nv.20$provincia == "PUNO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "PUNO", "dif"] / 219.494, digits = 4))
@@ -634,8 +639,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Satipo
 
 temp <- nv.20[nv.20$provincia == "SATIPO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Actual:",
                format(ex[ex$prov2 == "SATIPO", "dif"] / 203.985, digits = 4))
@@ -652,8 +657,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## San Martín
 
 temp <- nv.20[nv.20$provincia == "SAN MARTIN", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "SAN MARTIN", "dif"] / 193.095, digits = 4))
@@ -672,8 +677,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Jaen
 
 temp <- nv.20[nv.20$provincia == "JAEN", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
@@ -685,8 +690,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Huaral
 
 temp <- nv.20[nv.20$provincia == "HUARAL", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "HUARAL", "dif"] / 183.898, digits = 4))
@@ -705,8 +710,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Huaraz
 
 temp <- nv.20[nv.20$provincia == "HUARAZ", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "HUARAZ", "dif"] / 163.936, digits = 4))
@@ -725,10 +730,10 @@ ggplot(ds, aes(fecha, pais)) +
 ## Morropon
 
 temp <- nv.20[nv.20$provincia == "MORROPON", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "MORROPON", "dif"] / 162.027, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -739,13 +744,14 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr')) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-07-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-07-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-10-12", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Tumbes
 
 temp <- nv.20[nv.20$provincia == "TUMBES", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "TUMBES", "dif"] / 154.962, digits = 4))
@@ -765,8 +771,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Chanchamayo
 
 temp <- nv.20[nv.20$provincia == "CHANCHAMAYO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "CHANCHAMAYO", "dif"] / 151.489, digits = 4))
@@ -784,8 +790,8 @@ ggplot(ds, aes(fecha, pais)) +
 ## Pisco
 
 temp <- nv.20[nv.20$provincia == "PISCO", ]
-
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "PISCO", "dif"] / 150.744, digits = 4))
