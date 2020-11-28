@@ -22,7 +22,7 @@ library(httr)
 ```
 
 ```{r descargar, include = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_24112020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_26112020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -757,7 +757,7 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-08-02", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-10-12", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-11-17", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Pisco
 
