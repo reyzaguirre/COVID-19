@@ -16,16 +16,14 @@ options(digits = 4)
 
 library(ggplot2)
 library(st4gi)
-library(readxl) 
+library(openxlsx) 
 library(httr)
 ```
 
 ```{r datos, include = FALSE}
-# Leer datos
-
 #url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_30092020.xlsx"
 #GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
-full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
+full <- read.xlsx("temp.xlsx", sheet = 1, startRow = 4)
 full <- full[, c("PAIS.DOMICILIO", "DEPARTAMENTO.DOMICILIO", "PROVINCIA.DOMICILIO",
                  "DISTRITO.DOMICILIO", "FECHA", "AÑO")]
 colnames(full) <- c("pais", "departamento", "provincia", "distrito", "fecha", "ano")

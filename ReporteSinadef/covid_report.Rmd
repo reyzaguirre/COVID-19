@@ -17,7 +17,7 @@ options(digits = 4)
 library(ggplot2)
 library(ggrepel)
 library(st4gi)
-library(readxl) 
+library(openxlsx) 
 library(httr)
 ```
 
@@ -27,7 +27,7 @@ GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
 ```{r datos, include = FALSE}
-full <- data.frame(read_excel("temp.xlsx", sheet = 1, skip = 3))
+full <- read.xlsx("temp.xlsx", sheet = 1, startRow = 4)
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "NIVEL.DE.INSTRUCCIÓN", "PAIS.DOMICILIO",
                  "PROVINCIA.DOMICILIO", "DISTRITO.DOMICILIO", "FECHA", "AÑO", "MES",
                  "MUERTE.VIOLENTA")]
@@ -624,7 +624,7 @@ temp <- nv.20[nv.20$provincia == "PUNO", ]
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "PUNO", "dif"] / 219.494, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -635,8 +635,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1)  +
-  geom_vline(xintercept = as.Date("2020-08-15", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-10-10", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-08-15", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## San Martín
 
