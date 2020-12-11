@@ -1036,9 +1036,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 74851 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-```
-
-```{r distritopend, eval = FALSE}
 ## Breña
 
 temp <- full[full$distrito == "BREÑA", ]
@@ -1052,6 +1049,10 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 85309 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+```
+
+```{r distritopend, eval = FALSE}
 
 ## Cajamarca
 

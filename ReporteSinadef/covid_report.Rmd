@@ -21,8 +21,8 @@ library(openxlsx)
 library(httr)
 ```
 
-```{r descargar, include = FALSE, eval = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_06122020.xlsx"
+```{r descargar, include = FALSE}
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_10122020.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -44,7 +44,7 @@ full$ano <- as.numeric(full$ano)
 
 full$semana <- as.numeric(strftime(full$fecha, format = "%V"))
 
-# Eliminar otros paises
+# Eliminar otros países
 
 full <- full[full$pais == "PERU", ]
 
@@ -206,7 +206,7 @@ Los siguientes gráficos permiten evaluar la evolución de la epidemia a través
 
 ds <- docomp("count", "pais", "fecha", dfr = nv.20, method = 'slow')
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format((total.nv[4] - (total.nv[3] + total.nv[2] + sum(ex$ajust20, na.rm = TRUE)) / 3) / 31237.385, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -218,7 +218,8 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-06-20", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-12-08", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
 
 # ggplot(ds, aes(fecha, pais)) +
 #   geom_point() +
