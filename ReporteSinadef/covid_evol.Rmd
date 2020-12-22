@@ -1148,10 +1148,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 91935 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-```
-
-```{r distritopend, eval = FALSE}
-
 ## Cerro Colorado
 
 temp <- full[full$distrito == "CERRO COLORADO", ]
@@ -1165,6 +1161,10 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 197954 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+```
+
+```{r distritopend, eval = FALSE}
 
 ## Chiclayo
 
