@@ -21,8 +21,8 @@ library(openxlsx)
 library(httr)
 ```
 
-```{r descargar, include = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_21122020.xlsx"
+```{r descargar, include = FALSE, eval = FALSE}
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_01012021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -77,6 +77,7 @@ lamb <- prov.ano[rownames(prov.ano) == "LAMBAYEQUE", ]
 
 # Datos hasta el último día de todos los años
 
+full <- full[full$ano < 2021, ]
 full <- full[full$mes <= ultimo.mes, ]
 full <- full[!(full$mes == ultimo.mes & as.numeric(substr(full$fecha, 9, 10)) > ultimo.dia), ]
 
@@ -221,14 +222,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-08-11", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-12-08", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
-# ggplot(ds, aes(fecha, pais)) +
-#   geom_point() +
-#   labs(x = "Fecha", y = "Número de fallecidos diarios",
-#        title = "Fallecidos diarios a nivel nacional por causa no violenta y pronóstico a 7 días") +
-#   ylim(0, NA) +
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
-#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11), fullrange = TRUE, color = 2)
-
 ## Lima y Callao
 
 temp <- nv.20[nv.20$provincia %in% c("CALLAO", "LIMA"), ]
@@ -251,15 +244,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_vline(xintercept = as.Date("2020-07-17", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 2, size = 1.5) +
   geom_vline(xintercept = as.Date("2020-10-20", "%Y-%m-%d"), linetype = 2, color = 8, size = 1.5)
-
-# ggplot(ds, aes(fecha, pais)) +
-#   geom_point() +
-#   labs(x = "Fecha", y = "Número de fallecidos diarios",
-#        title = "Fallecidos diarios en las provincias de Lima y Callao por causa no violenta
-#  y pronóstico a 7 días") + 
-#   ylim(0, NA) +
-#   xlim(as.Date.numeric(0, "2020-01-01"), as.Date.numeric(dim(ds)[1] + 7, "2020-01-01")) +
-#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11), fullrange = TRUE, color = 2)
 
 ## Arequipa
 
@@ -493,7 +477,7 @@ temp <- nv.20[nv.20$provincia == "SAN ROMAN", ]
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
                format(ex[ex$prov2 == "SAN ROMAN", "dif"] / 307.417, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -504,8 +488,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-11-28", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-08-18", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
 
 ## Tacna
 
@@ -545,7 +528,7 @@ temp <- nv.20[nv.20$provincia == "HUANUCO", ]
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
                format(ex[ex$prov2 == "HUANUCO", "dif"] / 293.397, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -556,7 +539,8 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
-  geom_vline(xintercept = as.Date("2020-08-14", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-08-14", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-12-30", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
 
 ## Huamanga
 
@@ -707,7 +691,7 @@ temp <- nv.20[nv.20$provincia == "MORROPON", ]
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
-texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Actual:",
+texto <- paste("Exceso en número de fallecidos\npor 1000 habitantes:\n- Línea azul: 1\n- Línea verde: 2\n- Línea naranja: 3\n- Actual:",
                format(ex[ex$prov2 == "MORROPON", "dif"] / 162.027, digits = 4))
 
 ggplot(ds, aes(fecha, pais)) +
@@ -719,7 +703,8 @@ ggplot(ds, aes(fecha, pais)) +
   annotate(geom = "text", x = as.Date("2020-01-01", "%Y-%m-%d"), y = max(ds$pais),
            label = texto, size = 4.2, color = "darkblue", hjust = 0, vjust = 1) +
   geom_vline(xintercept = as.Date("2020-07-23", "%Y-%m-%d"), linetype = 2, color = 4, size = 1.5) +
-  geom_vline(xintercept = as.Date("2020-10-12", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5)
+  geom_vline(xintercept = as.Date("2020-10-12", "%Y-%m-%d"), linetype = 2, color = 3, size = 1.5) +
+  geom_vline(xintercept = as.Date("2020-12-30", "%Y-%m-%d"), linetype = 2, color = 7, size = 1.5)
 
 ## Tumbes
 
@@ -880,31 +865,6 @@ barplot(height = dc$ratio, names.arg = dc$distrito, horiz = TRUE, las = 1,
 en el último mes",
         xlab = "Cociente entre fallecidos por causa no violenta
 en 2020 y la media 2018-2019 en el último mes")
-
-```
-
-```{r exceso}
-
-#| Chiclayo         | `r ex[ex$prov2 == "CHICLAYO", "dif"] / 799675 * 1000` | 
-#| Lambayeque       | `r ex[ex$prov2 == "LAMBAYEQUE", "dif"] / 300170 * 1000` | 
-#| Pasco            | `r ex[ex$prov2 == "PASCO", "dif"] /	123015 * 1000` | 
-#| Huaral           | `r ex[ex$prov2 == "HUARAL", "dif"] / 183898 * 1000` | 
-#| San Martin       | `r ex[ex$prov2 == "SAN MARTIN", "dif"] / 193095 * 1000` | 
-#| Pisco            | `r ex[ex$prov2 == "PISCO", "dif"] / 150744 * 1000` | 
-#| Leoncio Prado    | `r ex[ex$prov2 == "LEONCIO PRADO", "dif"] / 127793 * 1000` | 
-#| Jaen             | `r ex[ex$prov2 == "JAEN", "dif"] / 185432 * 1000` | 
-#| Huaura           | `r ex[ex$prov2 == "HUAURA", "dif"] / 227685 * 1000` | 
-#| Alto Amazonas    | `r ex[ex$prov2 == "ALTO AMAZONAS", "dif"] /	122725 * 1000` | 
-#| Cañete           | `r ex[ex$prov2 == "CAÑETE", "dif"] / 240013 * 1000` | 
-#| Huaraz           | `r ex[ex$prov2 == "HUARAZ", "dif"] / 163936 * 1000` | 
-#| Chanchamayo      | `r ex[ex$prov2 == "CHANCHAMAYO", "dif"] / 151489 * 1000` | 
-#| Huánuco          | `r ex[ex$prov2 == "HUANUCO", "dif"] / 293397 * 1000` | 
-#| Ascope           | `r ex[ex$prov2 == "ASCOPE", "dif"] / 115786 * 1000` | 
-#| Chincha          | `r ex[ex$prov2 == "CHINCHA", "dif"] / 226113 * 1000` | 
-#| Tumbes           | `r ex[ex$prov2 == "TUMBES", "dif"] / 154962 * 1000` |
-#| Tambopata        | `r ex[ex$prov2 == "TAMBOPATA", "dif"] / 111474 * 1000` | 
-#| Paita            | `r ex[ex$prov2 == "PAITA", "dif"] / 129892 * 1000` | 
-#| Sullana          | `r ex[ex$prov2 == "SULLANA", "dif"] / 311454 * 1000` | 
 
 ```
 
@@ -1148,9 +1108,9 @@ ggplot(dc, aes(grupo, ratio, colour = sexo)) +
   geom_point() +
   geom_line(aes(grupo2)) +  
   labs(x = "Edad (en años)",
-       y = "Proporción de fallecidos",
+       y = "Proporción sobre el total poblacional",
        name = "Sexo",
-       title = "Estimación de la proporción de fallecidos por COVID-19 según sexo y edad") +
+       title = "Exceso de muerte para el 2020 con respecto a la media 2018-2019") +
   theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
 
 ```

@@ -21,7 +21,7 @@ library(httr)
 ```
 
 ```{r descargar, include = FALSE, eval = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_30092020.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_02012021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -51,8 +51,7 @@ full <- full[full$pais == "PERU", ]
 # Todas las fechas
 
 ultimo.fecha <- max(full$fecha)
-ff <- data.frame(fecha = seq(as.Date("2020-01-01", "%Y-%m-%d"), ultimo.fecha, by = "day"),
-                 pais = 0)
+ff <- data.frame(fecha = seq(as.Date("2020-01-01", "%Y-%m-%d"), ultimo.fecha, by = "day"), pais = 0)
 ```
 
 ## 1. Introducción
@@ -1204,10 +1203,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 206213 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-```
-
-```{r distritopend, eval = FALSE}
-
 ## Chorrillos
 
 temp <- full[full$distrito == "CHORRILLOS", ]
@@ -1235,6 +1230,10 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 82521 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+```
+
+```{r distritopend, eval = FALSE}
 
 ## Comas
 
