@@ -1231,10 +1231,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 82521 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-```
-
-```{r distritopend, eval = FALSE}
-
 ## Comas
 
 temp <- full[full$distrito == "COMAS" & full$provincia == "LIMA", ]
@@ -1248,6 +1244,10 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 520450 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+```
+
+```{r distritopend, eval = FALSE}
 
 ## Coronel gregorio albarracin lanchipa	
 
