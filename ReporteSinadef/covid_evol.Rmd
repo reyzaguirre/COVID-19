@@ -20,8 +20,8 @@ library(openxlsx)
 library(httr)
 ```
 
-```{r descargar, include = FALSE, eval = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_02012021.xlsx"
+```{r descargar, include = FALSE}
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_18012021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -1245,10 +1245,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 520450 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-```
-
-```{r distritopend, eval = FALSE}
-
 ## Coronel gregorio albarracin lanchipa	
 
 temp <- full[full$distrito == "CORONEL GREGORIO ALBARRACIN LANCHIPA", ]
@@ -1276,6 +1272,10 @@ ggplot(ds, aes(fecha, pais)) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 114630 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+
+```
+
+```{r distritopend, eval = FALSE}
 
 ## El Agustino
 

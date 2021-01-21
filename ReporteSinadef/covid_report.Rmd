@@ -17,7 +17,7 @@ options(digits = 4)
 library(ggplot2)
 library(ggrepel)
 library(st4gi)
-library(openxlsx) 
+library(openxlsx)
 library(httr)
 ```
 
