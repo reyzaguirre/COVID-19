@@ -99,7 +99,7 @@ total.nv <- table(full.nv$ano)
 
 nv.20 <- full.nv[full.nv$ano == 2020, ]
 
-# Conteo diario provincia y año
+# Conteo por provincia y año
 
 ds <- docomp("count", "pais", c("ano", "prov2"), dfr = full.nv, method = 'slow')
 
