@@ -1,97 +1,4 @@
 ###############################################################################
-## Coronavirus - Datos Peru
-###############################################################################
-
-setwd("D:/Users/reyzaguirre/Dropbox/RHEP-CIP")
-setwd("~/Dropbox/RHEP-CIP")
-
-library(readODS)
-library(ggplot2)
-
-d <- read_ods("MyBook.ods", 7, range = "A1:D45", col_names = TRUE)
-d$Fecha <- as.Date(d$Fecha, "%d/%m/%Y")
-
-## Modelo exponencial
-
-temp <- d[1:15, ]
-model <- lm(log(y) ~ Fecha, data = temp)
-pred <- data.frame(Fecha = seq(as.Date.numeric(0, d$Fecha[1]),
-                               as.Date.numeric(27, d$Fecha[1]), 1))
-pred.mod <- predict(model, newdata = pred, se.fit = TRUE)
-pred$y <- exp(pred.mod$fit)
-pred$ymin <- exp(pred.mod$fit - 1.96 * pred.mod$se.fit)
-pred$ymax <- exp(pred.mod$fit + 1.96 * pred.mod$se.fit)
-
-ggplot(d, aes(Fecha, y)) +
-  geom_point() +
-  geom_ribbon(data = pred, aes(ymin = ymin, ymax = ymax), alpha = 0.3) +
-  labs(x = "Fecha", y = "Número de casos identificados",
-       title = "Número de casos - Perú") +
-  geom_line(data = pred, col = 4)
-
-## Efectos cuarentena
-
-ggplot(d, aes(x = Fecha)) +
-  geom_point(aes(y = y, colour = "Observado")) +
-  geom_smooth(aes(y = y, colour = "Observado"),
-              method = "auto", span = .75) +
-  geom_smooth(data = pred, aes(y = y, colour = "Modelo exponencial"),
-              method = "auto", span = .75) +
-  labs(x = "Fecha", y = "Número de casos identificados", color = "") +
-  theme(legend.position = "bottom",
-        legend.box = "vertical")
-
-## Pronosticos numero de casos identificados
-
-ggplot(d, aes(Fecha, y)) +
-  geom_point() +
-  xlim(as.Date.numeric(0, d$Fecha[1]), as.Date.numeric(37, d$Fecha[1])) + 
-  labs(x = "Fecha", y = "Número de casos identificados") +
-  geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3), fullrange = TRUE)
-
-ggplot(d, aes(Fecha, y)) +
-  geom_point() +
-  xlim(as.Date.numeric(0, d$Fecha[1]), as.Date.numeric(37, d$Fecha[1])) + 
-  labs(x = "Fecha", y = "Número de casos identificados") +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE)
-
-ggplot(d, aes(Fecha, y)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de casos identificados") +
-  geom_smooth(method = "auto", span = 0.9)
-
-## Pronosticos numero de casos totales estimados
-
-d$yt <- 0
-
-tc <- c(rep(0.11, 14), seq(0.11, 0.08, -0.002), rep(0.08, 15))
-
-for (i in 1:45)
-  d$yt[i] <- foo(0.003, tc[i], d$yd[i])$infected_total / 1000
-
-temp <- d[12:45, ]
-
-ggplot(temp, aes(Fecha, yt)) +
-  geom_point() +
-  xlim(as.Date.numeric(0, temp$Fecha[1]), as.Date.numeric(25, temp$Fecha[1])) + 
-  labs(x = "Fecha", y = "Número estimado de casos totales (en miles)") +
-  geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3), fullrange = TRUE)
-
-ggplot(temp, aes(Fecha, yt)) +
-  geom_point() +
-  xlim(as.Date.numeric(0, temp$Fecha[1]), as.Date.numeric(25, temp$Fecha[1])) + 
-  labs(x = "Fecha", y = "Número estimado de casos totales (en miles)") +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr'), fullrange = TRUE)
-
-## Pronosticos numero de muertos
-
-ggplot(temp, aes(Fecha, yd)) +
-  geom_point() +
-  xlim(as.Date.numeric(0, temp$Fecha[1]), as.Date.numeric(25, temp$Fecha[1])) + 
-  labs(x = "Fecha", y = "Número de fallecidos") +
-  geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3), fullrange = TRUE)
-
-###############################################################################
 ## Coronavirus - Datos Mundo por pais
 ###############################################################################
 
@@ -400,91 +307,6 @@ model <- glm(yd ~ x, family = poisson, temp)
 summary(model)
 exp(coef(model)[2])
 
-###############################################################################
-## Coronavirus - Datos Peru - Estimacion de casos
-###############################################################################
-
-setwd("D:/Users/reyzaguirre/Dropbox/RHEP-CIP")
-setwd("~/Dropbox/RHEP-CIP")
-
-library(readODS)
-library(ggplot2)
-
-d <- read_ods("MyBook.ods", 7, range = "A1:D49", col_names = TRUE)
-d$Fecha <- as.Date(d$Fecha, "%d/%m/%Y")
-
-## Pronosticos numero de casos totales estimados
-
-a <- 20
-b <- 5000
-a / b * 100
-qgamma(0.005, a, b) * 100
-qgamma(0.995, a, b) * 100
-
-m <- 0.12
-s <- 0.015
-qnorm(0.005, m, s)
-qnorm(0.995, m, s)
-log(2) / log(1 + m)
-log(2) / log(1 + qnorm(0.005, m, s))
-log(2) / log(1 + qnorm(0.995, m, s))
-
-tl <- 18
-
-nsim <- 1000
-dr <- rgamma(nsim, a, b)
-ir <- rnorm(nsim, m, s)
-nsd <- 0.15
-alpha <- 0.01
-
-temp <- d[14:49, ]
-temp$yt <- 0
-
-for (i in 1:36)
-  temp$yt[i] <- foo(dr[1], ir[1], tl, temp$yd[i])$infected_now / 1000
-
-model <- lm(yt ~ splines::bs(Fecha, 3), data = temp)
-newd <- with(temp, data.frame(Fecha = seq(min(Fecha), max(Fecha), length = 40)))
-pred <- predict(model, newd, se.fit = TRUE)
-se.fit <- pred$se.fit
-
-pred <- transform(cbind(data.frame(pred), newd),
-                  upl = fit + nsd * se.fit * c(1:40),
-                  lwl = fit - nsd * se.fit * c(1:40))
-
-p <- ggplot(pred, aes(x = Fecha)) +
-  labs(x = "Fecha", y = "Número estimado de casos totales (en miles)") +
-  theme(text = element_text(family = 'Gill Sans', color = "#444444")
-        ,panel.background = element_rect(fill = '#444B5A')
-        ,panel.grid.minor = element_line(color = '#4d5566')
-        ,panel.grid.major = element_line(color = '#586174')) +
-  geom_ribbon(aes(ymin = lwl, ymax = upl),
-              alpha = alpha, fill = "cyan")
-
-for (j in 2:nsim) {
-  
-  temp$yt <- 0
-  
-  for (i in 1:36)
-    temp$yt[i] <- foo(dr[j], ir[j], tl, temp$yd[i])$infected_now / 1000
-  
-  model <- lm(yt ~ splines::bs(Fecha, 3), data = temp)
-  newd <- with(temp, data.frame(Fecha = seq(min(Fecha), max(Fecha), length = 40)))
-  pred <- predict(model, newd, se.fit = TRUE)
-  se.fit <- pred$se.fit
-  
-  pred <- transform(cbind(data.frame(pred), newd),
-                    upl = fit + nsd * se.fit * c(1:40),
-                    lwl = fit - nsd * se.fit * c(1:40))
-  
-  p <- p +
-    geom_ribbon(aes(ymin = lwl, ymax = upl), data = pred,
-                alpha = alpha, fill = "cyan")
-  
-}
-
-p
-
 ##############################################################################
 ## Estimacion de muertos
 ###############################################################################
@@ -512,3 +334,79 @@ ggplot(d, aes(año, y, colour = mes)) +
   geom_point() +
   labs(x = "Año", y = "Número de fallecidos por mes") +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE)
+
+##############################################################################
+## SINADEF - evolución por edad
+###############################################################################
+
+options(stringsAsFactors = FALSE)
+options(digits = 4)
+
+library(ggplot2)
+library(st4gi)
+library(openxlsx)
+
+full <- read.xlsx("ReporteSinadef/temp.xlsx", sheet = 1, startRow = 4)
+full <- full[, c("EDAD", "TIEMPO.EDAD", "PAIS.DOMICILIO",
+                 "FECHA", "AÑO", "MES", "MUERTE.VIOLENTA")]
+colnames(full) <- c("edad", "unidad", "pais", "fecha", "ano", "mes", "violenta")
+
+# Formato fecha
+
+full$fecha <- as.Date(full$fecha, "%Y-%m-%d")
+full$mes <- as.numeric(full$mes)
+full$ano <- as.numeric(full$ano)
+
+# Eliminar otros países
+
+full <- full[full$pais == "PERU", ]
+
+# Identificar último día (eliminar último día de registro)
+
+ultimo.fecha <- max(full$fecha) - 1
+full <- full[full$fecha < ultimo.fecha, ]
+
+# Limpiar solo edad en anos
+
+full <- full[full$unidad == "AÑOS" & full$edad != "SIN REGISTRO", ]
+full$edad <- as.numeric(full$edad)
+
+# Grupos de edad
+
+full$grupo <- "80 y más"
+full$grupo[full$edad < 80] <- "70 a 79"
+full$grupo[full$edad < 70] <- "60 a 69"
+full$grupo[full$edad < 60] <- "50 a 59"
+full$grupo[full$edad < 50] <- "40 a 49"
+full$grupo[full$edad < 40] <- "30 a 39"
+full$grupo[full$edad < 30] <- "0 a 29"
+
+# Referencia diaria 2019
+
+tt <- table(full[full$ano == 2019, "grupo"]) / 365
+tt <- data.frame(tt)
+colnames(tt) <- c("grupo", "base")
+
+# Conteo diario
+
+ds <- docomp("count", "pais", c("grupo", "fecha"), dfr = full, method = 'fast')
+
+# Graficar 2020 y 2021
+
+ds <- ds[ds$fecha > "2019-12-31", ]
+
+# Calcular cociente
+
+ds <- merge(ds, tt)
+ds$ratio <- ds$pais / ds$base
+
+# Grafico
+
+ggplot(ds, aes(fecha, ratio, colour = grupo)) +
+  geom_point() +
+  labs(x = "Fecha",
+       y = "Cociente con respecto a la media 2019",
+       name = "Grupo de Edad",
+       title = "Número de fallecidos diarios a nivel nacional según grupo de edad") + 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11))
+
