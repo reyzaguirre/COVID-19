@@ -56,20 +56,26 @@ ff <- data.frame(fecha = seq(as.Date("2020-01-01", "%Y-%m-%d"), ultimo.fecha, by
 
 ## 1. Introducción
 
-Los datos del sistema Informático Nacional de Defunciones, SINADEF, pueden descargarse desde [este enlace](http://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp) y cuentan con el registro de defunciones desde el año 2017. En la circunstancia actual, estos datos permiten evaluar el efecto de la epidemia de COVID-19 en el país. Es importante tener en cuenta que podría haber un efecto de cobertura (o falta de cobertura); si se considera una tasa de mortalidad para el país de un 5.6 por mil, el número de fallecidos registrados en Sinadef para los años 2017, 2018 y 2019 sería del 54.2%, 61.8% y 62.9%, respectivamente. Este subregistro no es igual en todas las provincias y distritos; como referencia, en los gráficos siguientes se coloca una lìnea verde indicando el nivel correspondiente a un registro al 100% con una tasa de mortalidad de 5.6 por mil.
+Los datos del sistema Informático Nacional de Defunciones, SINADEF, pueden descargarse desde [este enlace](http://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp) y cuentan con el registro de defunciones desde el año 2017. En la circunstancia actual, estos datos permiten evaluar el efecto de la epidemia de COVID-19 en el país. Es importante tener en cuenta que podría haber un efecto de cobertura (o falta de cobertura); si se considera una tasa de mortalidad para el país de un 5.6 por mil, el número de fallecidos registrados en Sinadef para los años 2017, 2018 y 2019 sería del 54.2%, 61.8% y 62.9%, respectivamente. Este subregistro no es igual en todas las provincias; como referencia, en los gráficos siguientes se coloca una linea verde indicando el nivel correspondiente a un registro al 100% con una tasa de mortalidad de 5.6 por mil y una línea roja indicando el promedio observado en los primeros 3 meses del 2020. Esta línea roja se utiliza como base para calcular el exceso de muerte.
 
 ## 2. Evolución del número de fallecidos diarios a nivel nacional
 
 ```{r peru}
 ds <- docomp("count", "pais", "fecha", dfr = full, method = 'slow')
 
+lb <- sum(ds$pais[ds$fecha <= "2020-03-31"]) / 91
+ds$dif <- ds$pais - lb
+texto <- paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))
+
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios a nivel nacional") +
+       title = "Fallecidos diarios a nivel nacional",
+       subtitle = texto) +
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 32625948 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 12)) +
+  geom_hline(yintercept = 32625948 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
+  geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 ```
 
 ## 3. Evolución del número de fallecidos diarios por departamento
@@ -123,13 +129,19 @@ temp <- full[full$departamento == "AREQUIPA", ]
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
+lb <- sum(ds$pais[ds$fecha <= "2020-03-31"]) / 91
+ds$dif <- ds$pais - lb
+texto <- paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))
+
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el departamento de Arequipa") + 
+       title = "Fallecidos diarios en el departamento de Arequipa", 
+       subtitle = texto) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 1497438 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+  geom_hline(yintercept = 1497438 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
+  geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 
 ## Ayacucho
 
@@ -263,13 +275,19 @@ temp <- full[full$departamento %in% c("CALLAO", "LIMA"), ]
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
 ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
+lb <- sum(ds$pais[ds$fecha <= "2020-03-31"]) / 91
+ds$dif <- ds$pais - lb
+texto <- paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))
+
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el departamento de Lima") + 
+       title = "Fallecidos diarios en el departamento de Lima",
+        subtitle = texto) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = (10628470 + 1129854) * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+  geom_hline(yintercept = (10628470 + 1129854) * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
+  geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 
 ## Loreto
 
@@ -962,36 +980,36 @@ ggplot(ds, aes(fecha, pais)) +
   geom_hline(yintercept = 154962 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 ```
 
-## 5. Evolución del número de fallecidos diarios por distrito (más de 70000 habitantes)
+```{r distrito, eval = FALSE}
+## 5. Evolución del número de fallecidos diarios por distrito (más de 100000 habitantes)
 
-```{r distrito}
-## Alto Selva Alegre
-
-temp <- full[full$distrito == "ALTO SELVA ALEGRE", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Alto Selva Alegre (Arequipa, Arequipa)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 85870 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Amarilis
-
-temp <- full[full$distrito == "AMARILIS", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Amarilis (Huánuco, Huánuco)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 81461 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Alto Selva Alegre
+# 
+# temp <- full[full$distrito == "ALTO SELVA ALEGRE", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Alto Selva Alegre (Arequipa, Arequipa)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 85870 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# 
+# ## Amarilis
+# 
+# temp <- full[full$distrito == "AMARILIS", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Amarilis (Huánuco, Huánuco)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 81461 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Ate
 
@@ -1007,47 +1025,47 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 599196 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Ayacucho
-
-temp <- full[full$distrito == "AYACUCHO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Ayacucho (Huamanga, Ayacucho)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 99427 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Bellavista
-
-temp <- full[full$distrito == "BELLAVISTA" & full$provincia == "CALLAO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Bellavista (Callao, Callao)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 74851 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Breña
-
-temp <- full[full$distrito == "BREÑA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Breña (Lima, Lima)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 85309 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Ayacucho
+# 
+# temp <- full[full$distrito == "AYACUCHO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Ayacucho (Huamanga, Ayacucho)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 99427 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# 
+# ## Bellavista
+# 
+# temp <- full[full$distrito == "BELLAVISTA" & full$provincia == "CALLAO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Bellavista (Callao, Callao)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 74851 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# 
+# ## Breña
+# 
+# temp <- full[full$distrito == "BREÑA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Breña (Lima, Lima)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 85309 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Cajamarca
 
@@ -1119,33 +1137,33 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 160201 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Catacaos
+# ## Catacaos
+# 
+# temp <- full[full$distrito == "CATACAOS", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Catacaos (Piura, Piura)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 75870 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-temp <- full[full$distrito == "CATACAOS", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Catacaos (Piura, Piura)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 75870 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Cayma
-
-temp <- full[full$distrito == "CAYMA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Cayma (Arequipa, Arequipa)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 91935 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Cayma
+# 
+# temp <- full[full$distrito == "CAYMA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Cayma (Arequipa, Arequipa)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 91935 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Cerro Colorado
 
@@ -1175,19 +1193,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 270496 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Chilca
-
-temp <- full[full$distrito == "CHILCA" & full$provincia == "HUANCAYO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Chilca (Huancayo, Junín)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 91851 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Chilca
+# 
+# temp <- full[full$distrito == "CHILCA" & full$provincia == "HUANCAYO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Chilca (Huancayo, Junín)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 91851 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Chimbote
 
@@ -1217,19 +1235,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 314241 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Chulucanas
-
-temp <- full[full$distrito == "CHULUCANAS", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Chulucanas (Morropón, Piura)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 82521 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Chulucanas
+# 
+# temp <- full[full$distrito == "CHULUCANAS", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Chulucanas (Morropón, Piura)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 82521 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Comas
 
@@ -1287,10 +1305,6 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 198862 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-```
-
-```{r distritopend, eval = FALSE}
-
 ## El Porvenir
 
 temp <- full[full$distrito == "EL PORVENIR" & full$provincia == "TRUJILLO", ]
@@ -1319,19 +1333,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 166359 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Huaral
-
-temp <- full[full$distrito == "HUARAL", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Huaral (Huaral, Lima)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 99915 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Huaral
+# 
+# temp <- full[full$distrito == "HUARAL", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Huaral (Huaral, Lima)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 99915 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Huancayo
 
@@ -1347,19 +1361,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 119993 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Huánuco
-
-temp <- full[full$distrito == "HUANUCO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Huánuco (Huánuco, Huánuco)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 89502 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Huánuco
+# 
+# temp <- full[full$distrito == "HUANUCO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Huánuco (Huánuco, Huánuco)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 89502 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Ica
 
@@ -1375,19 +1389,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 150280 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Independencia
-
-temp <- full[full$distrito == "INDEPENDENCIA" & full$provincia == "HUARAZ", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Independencia (Huaraz, Ancash)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 76088 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Independencia
+# 
+# temp <- full[full$distrito == "INDEPENDENCIA" & full$provincia == "HUARAZ", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Independencia (Huaraz, Ancash)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 76088 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Independencia
 
@@ -1417,33 +1431,33 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 146853 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Jaen
+# ## Jaen
+# 
+# temp <- full[full$distrito == "JAEN", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Jaén (Jaén, Cajamarca)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 94153 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-temp <- full[full$distrito == "JAEN", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Jaén (Jaén, Cajamarca)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 94153 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Jesús María
-
-temp <- full[full$distrito == "JESUS MARIA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Jesús María (Lima, Lima)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 75359 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Jesús María
+# 
+# temp <- full[full$distrito == "JESUS MARIA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Jesús María (Lima, Lima)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 75359 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## José Leonardo Ortiz
 
@@ -1459,19 +1473,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 156498 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## José Luis Bustamante y Rivero
-
-temp <- full[full$distrito == "JOSE LUIS BUSTAMANTE Y RIVERO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de José Luis Bustamant y Rivero (Arequipa, Arequipa)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 81829 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## José Luis Bustamante y Rivero
+# 
+# temp <- full[full$distrito == "JOSE LUIS BUSTAMANTE Y RIVERO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de José Luis Bustamant y Rivero (Arequipa, Arequipa)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 81829 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Juliaca
 
@@ -1515,19 +1529,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 140679 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## La Victoria
-
-temp <- full[full$distrito == "LA VICTORIA" & full$provincia == "CHICLAYO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de La Victoria (Chiclayo, Lambayeque)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 90912 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## La Victoria
+# 
+# temp <- full[full$distrito == "LA VICTORIA" & full$provincia == "CHICLAYO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de La Victoria (Chiclayo, Lambayeque)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 90912 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## La Victoria
 
@@ -1543,19 +1557,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 173630 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Lambayeque
-
-temp <- full[full$distrito == "LAMBAYEQUE", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Lambayeque (Lambayeque, Lambayeque)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 71425 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Lambayeque
+# 
+# temp <- full[full$distrito == "LAMBAYEQUE", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Lambayeque (Lambayeque, Lambayeque)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 71425 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Lima
 
@@ -1599,61 +1613,61 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 240814 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Lurín
+# ## Lurín
+# 
+# temp <- full[full$distrito == "LURIN", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Lurín (Lima, Lima)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 89195 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-temp <- full[full$distrito == "LURIN", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# ## Manantay
+# 
+# temp <- full[full$distrito == "MANANTAY", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Manantay (Coronel Portillo, Ucayali)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 87525 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Lurín (Lima, Lima)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 89195 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Miraflores
+# 
+# temp <- full[full$distrito == "MIRAFLORES" & full$provincia == "LIMA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Miraflores (Lima, Lima)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 99337 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Manantay
-
-temp <- full[full$distrito == "MANANTAY", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Manantay (Coronel Portillo, Ucayali)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 87525 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Miraflores
-
-temp <- full[full$distrito == "MIRAFLORES" & full$provincia == "LIMA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Miraflores (Lima, Lima)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 99337 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Moyobamba
-
-temp <- full[full$distrito == "MOYOBAMBA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Moyobamba (Moyobamba, San Martín)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 76325 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Moyobamba
+# 
+# temp <- full[full$distrito == "MOYOBAMBA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Moyobamba (Moyobamba, San Martín)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 76325 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Nuevo Chimbote
 
@@ -1683,33 +1697,33 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 110071 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Paita
+# ## Paita
+# 
+# temp <- full[full$distrito == "PAITA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Paita (Paita, Piura)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 87979 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-temp <- full[full$distrito == "PAITA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Paita (Paita, Piura)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 87979 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Pariñas
-
-temp <- full[full$distrito == "PARIÑAS", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Pariñas (Talara, Piura)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 98309 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Pariñas
+# 
+# temp <- full[full$distrito == "PARIÑAS", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Pariñas (Talara, Piura)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 98309 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Paucarpata
 
@@ -1739,19 +1753,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 158495 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Pueblo Libre
-
-temp <- full[full$distrito == "PUEBLO LIBRE" & full$provincia == "LIMA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Pueblo Libre (Lima, Lima)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 83323 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Pueblo Libre
+# 
+# temp <- full[full$distrito == "PUEBLO LIBRE" & full$provincia == "LIMA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Pueblo Libre (Lima, Lima)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 83323 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Puenta Piedra
 
@@ -1767,19 +1781,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 329675 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Punchana
-
-temp <- full[full$distrito == "PUNCHANA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Punchana (Maynas, Loreto)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 75210 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Punchana
+# 
+# temp <- full[full$distrito == "PUNCHANA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Punchana (Maynas, Loreto)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 75210 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Puno
 
@@ -1921,19 +1935,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 196214 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Santiago
-
-temp <- full[full$distrito == "SANTIAGO" & full$provincia == "CUSCO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Santiago (Cusco, Cusco)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 94756 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Santiago
+# 
+# temp <- full[full$distrito == "SANTIAGO" & full$provincia == "CUSCO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Santiago (Cusco, Cusco)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 94756 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Santiago de Surco
 
@@ -1949,19 +1963,19 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 329152 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Socabaya
-
-temp <- full[full$distrito == "SOCABAYA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Socabaya (Arequipa, Arequipa)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 75351 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Socabaya
+# 
+# temp <- full[full$distrito == "SOCABAYA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Socabaya (Arequipa, Arequipa)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 75351 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Sullana
 
@@ -1977,33 +1991,33 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 169335 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Surquillo
+# ## Surquillo
+# 
+# temp <- full[full$distrito == "SURQUILLO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Surquillo (Lima, Lima)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 91023 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-temp <- full[full$distrito == "SURQUILLO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Surquillo (Lima, Lima)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 91023 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Tacna
-
-temp <- full[full$distrito == "TACNA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Tacna (Tacna, Tacna)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 92972 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Tacna
+# 
+# temp <- full[full$distrito == "TACNA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Tacna (Tacna, Tacna)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 92972 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Tambo Grande
 
@@ -2019,33 +2033,33 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 107495 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Tambopata
+# ## Tambopata
+# 
+# temp <- full[full$distrito == "TAMBOPATA", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Tambopata (Tambopata, Madre de Dios)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 81925 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-temp <- full[full$distrito == "TAMBOPATA", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Tambopata (Tambopata, Madre de Dios)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 81925 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
-
-## Tarapoto
-
-temp <- full[full$distrito == "TARAPOTO", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Tarapoto (San Martín, San Martín)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 76122 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
+# ## Tarapoto
+# 
+# temp <- full[full$distrito == "TARAPOTO", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Tarapoto (San Martín, San Martín)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 76122 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Trujillo
 
@@ -2145,17 +2159,18 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 103941 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Yurimaguas
+# ## Yurimaguas
+# 
+# temp <- full[full$distrito == "YURIMAGUAS", ]
+# ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
+# ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
+# 
+# ggplot(ds, aes(fecha, pais)) +
+#   geom_point() +
+#   labs(x = "Fecha", y = "Número de fallecidos diarios",
+#        title = "Fallecidos diarios en el distrito de Yurimaguas (Alto Amazonas, Loreto)") + 
+#   ylim(0, NA) +
+#   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+#   geom_hline(yintercept = 83554 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-temp <- full[full$distrito == "YURIMAGUAS", ]
-ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
-ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
-
-ggplot(ds, aes(fecha, pais)) +
-  geom_point() +
-  labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios en el distrito de Yurimaguas (Alto Amazonas, Loreto)") + 
-  ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
-  geom_hline(yintercept = 83554 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 ```
