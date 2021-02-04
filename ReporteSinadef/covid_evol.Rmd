@@ -73,7 +73,7 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios a nivel nacional",
        subtitle = texto) +
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 12)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
   geom_hline(yintercept = 32625948 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
   geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 ```
@@ -182,7 +182,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Cusco") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 12)) +
   geom_hline(yintercept = 1357075 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Huancavelica
@@ -285,7 +285,7 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios en el departamento de Lima",
         subtitle = texto) +
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 12)) +
   geom_hline(yintercept = (10628470 + 1129854) * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
   geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 
@@ -300,7 +300,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Loreto") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 12)) +
   geom_hline(yintercept = 1027559 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Madre de Dios
@@ -356,7 +356,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Piura") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 12)) +
   geom_hline(yintercept = 2047954 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Puno
