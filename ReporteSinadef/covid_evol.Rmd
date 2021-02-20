@@ -21,7 +21,7 @@ library(httr)
 ```
 
 ```{r descargar, include = FALSE, eval = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_14022021.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_18022021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -44,6 +44,17 @@ full$ano <- as.numeric(full$ano)
 
 full <- full[full$fecha >= "2020-01-01" & full$fecha < max(full$fecha), ]
 
+# Identificar último día
+
+ultimo.fecha <- max(full$fecha) - 1
+ultimo.dia <- as.numeric(substr(ultimo.fecha, 9, 10))
+ultimo.mes <- as.numeric(substr(ultimo.fecha, 6, 7))
+
+lista.meses <- c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+                 "agosto", "septiembre", "octubre", "noviembre", "diciembre")
+
+ultimo.mes.texto <- lista.meses[ultimo.mes]
+
 # Eliminar otros paises
 
 full <- full[full$pais == "PERU", ]
@@ -65,13 +76,12 @@ ds <- docomp("count", "pais", "fecha", dfr = full, method = 'slow')
 
 lb <- sum(ds$pais[ds$fecha <= "2020-03-31"]) / 91
 ds$dif <- ds$pais - lb
-texto <- paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
-       title = "Fallecidos diarios a nivel nacional",
-       subtitle = texto) +
+       title = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia, "de", ultimo.mes.texto),
+       subtitle = paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
   geom_hline(yintercept = 32625948 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
@@ -131,13 +141,12 @@ ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 lb <- sum(ds$pais[ds$fecha <= "2020-03-31"]) / 91
 ds$dif <- ds$pais - lb
-texto <- paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Arequipa", 
-       subtitle = texto) +
+       subtitle = paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11)) +
   geom_hline(yintercept = 1497438 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
@@ -277,13 +286,12 @@ ds <- rbind(ds, ff[!(ff$fecha %in% ds$fecha), ])
 
 lb <- sum(ds$pais[ds$fecha <= "2020-03-31"]) / 91
 ds$dif <- ds$pais - lb
-texto <- paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))
 
 ggplot(ds, aes(fecha, pais)) +
   geom_point() +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Lima",
-        subtitle = texto) +
+       subtitle = paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 12)) +
   geom_hline(yintercept = (10628470 + 1129854) * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
