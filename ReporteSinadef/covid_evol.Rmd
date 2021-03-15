@@ -20,8 +20,8 @@ library(openxlsx)
 library(httr)
 ```
 
-```{r descargar, include = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_07032021.xlsx"
+```{r descargar, include = FALSE, eval = FALSE}
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_14032021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -82,6 +82,10 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia, "de", ultimo.mes.texto),
        subtitle = paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))) +
+  # annotate(geom = "text", x = as.Date("2020-06-20", "%Y-%m-%d"), y = 1140,
+  #          label = "No votes por golpistas", size = 5, color = "darkblue", hjust = 0, vjust = 1) +
+  # annotate(geom = "text", x = as.Date("2021-01-25", "%Y-%m-%d"), y = 700,
+  #          label = "Las vacunas sí sirven", size = 5, color = "darkblue", hjust = 0, vjust = 1) +
   ylim(0, NA) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 32625948 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
@@ -770,7 +774,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Lima (Lima)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 8574974 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Maynas
