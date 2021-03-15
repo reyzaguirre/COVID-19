@@ -410,3 +410,40 @@ ggplot(ds, aes(fecha, ratio, colour = grupo)) +
        title = "Número de fallecidos diarios a nivel nacional según grupo de edad") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11))
 
+###############################################################################
+## Perú llegada vacunas
+###############################################################################
+
+library(ggplot2)
+library(reshape2)
+library(st4gi)
+
+laboratorios <- c("Sinopharm", "Pfizer")
+nl <- length(laboratorios)
+
+d <- data.frame(Fecha = c(rep(Sys.Date(), nl),
+                          "2021-02-07", "2021-02-13", "2021-03-03", "2021-03-10"),
+                Cantidad = c(rep(0, nl), .3, .7, .05, .167),
+                Laboratorio = c(laboratorios, "Sinopharm", "Sinopharm",
+                                "Pfizer", "Pfizer"))
+
+d$Fecha <- as.Date(d$Fecha, "%Y-%m-%d")
+
+temp <- data.frame(tapply(d$Cantidad, list(d$Fecha, d$Laboratorio), sum))
+temp[is.na(temp)] <- 0
+temp <- data.frame(apply(temp, 2, cumsum))
+temp$Fecha <- rownames(temp)
+
+temp <- melt(temp, "Fecha")
+temp$Fecha <- as.Date(temp$Fecha, "%Y-%m-%d")
+colnames(temp)[2] <- "Laboratorio"
+
+ggplot(temp, aes(Fecha, value, colour = Laboratorio)) +
+  geom_step() +
+  labs(y = "Cantidad acumulada en millones")
+
+temp <- docomp("sum", "Cantidad", "Laboratorio", dfr = d)
+
+ggplot(temp, aes(Laboratorio, Cantidad)) +
+  labs(y = "Cantidad en millones") +
+  geom_bar(stat = "identity", fill = "steelblue")
