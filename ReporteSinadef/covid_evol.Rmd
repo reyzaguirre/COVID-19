@@ -21,7 +21,7 @@ library(httr)
 ```
 
 ```{r descargar, include = FALSE, eval = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_14032021.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_15032021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
