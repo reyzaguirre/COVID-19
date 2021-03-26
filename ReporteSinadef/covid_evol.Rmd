@@ -20,8 +20,8 @@ library(openxlsx)
 library(httr)
 ```
 
-```{r descargar, include = FALSE, eval = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_15032021.xlsx"
+```{r descargar, include = FALSE}
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_25032021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -87,7 +87,7 @@ ggplot(ds, aes(fecha, pais)) +
   # annotate(geom = "text", x = as.Date("2021-01-25", "%Y-%m-%d"), y = 700,
   #          label = "Las vacunas sí sirven", size = 5, color = "darkblue", hjust = 0, vjust = 1) +
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 16)) +
   geom_hline(yintercept = 32625948 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
   geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 ```
@@ -200,7 +200,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Cusco") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 1357075 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Huancavelica
@@ -217,7 +217,7 @@ ggplot(ds, aes(fecha, pais)) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
   geom_hline(yintercept = 365317 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
-## Huànuco
+## Huánuco
 
 temp <- full[full$departamento == "HUANUCO", ]
 ds <- docomp("count", "pais", "fecha", dfr = temp, method = 'slow')
@@ -228,7 +228,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Huánuco") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 760267 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Ica
@@ -322,7 +322,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Loreto") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 18)) +
   geom_hline(yintercept = 1027559 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Madre de Dios
@@ -350,7 +350,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Moquegua") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 18)) +
   geom_hline(yintercept = 192740 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Pasco
@@ -392,7 +392,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Puno") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 1237997 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## San Martín
@@ -434,7 +434,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Tumbes") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 251521 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Ucayali
@@ -448,7 +448,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en el departamento de Ucayali") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 18)) +
   geom_hline(yintercept = 589110 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 ```
 
@@ -578,7 +578,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Chincha (Ica)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 226113 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 # ## Chota
@@ -606,7 +606,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Coronel Portillo (Ucayali)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 18)) +
   geom_hline(yintercept = 384168 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Cusco
@@ -620,7 +620,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Cusco (Cusco)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 447588 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Huacho
@@ -788,7 +788,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Maynas (Loreto)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 18)) +
   geom_hline(yintercept = 479866 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Morropón
@@ -844,7 +844,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Puno (Puno)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 219494 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 # ## San Ignacio
@@ -886,7 +886,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de San Román (Puno)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 307417 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 # ## Sánchez Carrión
@@ -942,7 +942,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Sullana (Piura)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 16)) +
   geom_hline(yintercept = 311454 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 ## Tacna
@@ -956,7 +956,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Tacna (Tacna)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 306363 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 
 # ## Talara
@@ -998,7 +998,7 @@ ggplot(ds, aes(fecha, pais)) +
   labs(x = "Fecha", y = "Número de fallecidos diarios",
        title = "Fallecidos diarios en la provincia de Tumbes (Tumbes)") + 
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 14)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
   geom_hline(yintercept = 154962 * 0.0056 / 365, linetype = 2, color = 3, size = 1)
 ```
 
