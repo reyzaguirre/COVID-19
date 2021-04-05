@@ -423,11 +423,11 @@ nl <- length(laboratorios)
 
 d <- data.frame(Fecha = c(rep(Sys.Date(), nl), rep("2021-02-06", nl),
                           "2021-02-07", "2021-02-13", "2021-03-03", "2021-03-10",
-                          "2021-03-17", "2021-03-24"),
-                Cantidad = c(rep(0, nl * 2), .3, .7, .05, .167, .05, .05),
+                          "2021-03-17", "2021-03-24", "2021-03-31"),
+                Cantidad = c(rep(0, nl * 2), .3, .7, .05, .167, .05, .05, .05),
                 Laboratorio = c(laboratorios, laboratorios, "Sinopharm",
                                 "Sinopharm", "Pfizer", "Pfizer", "Pfizer",
-                                "Pfizer"))
+                                "Pfizer", "Pfizer"))
 
 d$Fecha <- as.Date(d$Fecha, "%Y-%m-%d")
 

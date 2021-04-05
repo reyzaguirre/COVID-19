@@ -21,7 +21,7 @@ library(httr)
 ```
 
 ```{r descargar, include = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_25032021.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_04042021.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
@@ -87,7 +87,7 @@ ggplot(ds, aes(fecha, pais)) +
   # annotate(geom = "text", x = as.Date("2021-01-25", "%Y-%m-%d"), y = 700,
   #          label = "Las vacunas sí sirven", size = 5, color = "darkblue", hjust = 0, vjust = 1) +
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 16)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 18)) +
   geom_hline(yintercept = 32625948 * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
   geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 ```
@@ -307,7 +307,7 @@ ggplot(ds, aes(fecha, pais)) +
        title = "Fallecidos diarios en el departamento de Lima",
        subtitle = paste("Exceso con respecto a la línea roja:", round(sum(ds$dif)))) +
   ylim(0, NA) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 15)) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 16)) +
   geom_hline(yintercept = (10628470 + 1129854) * 0.0056 / 365, linetype = 2, color = 3, size = 1) +
   geom_hline(yintercept = lb, linetype = 2, color = 2, size = 1)
 
