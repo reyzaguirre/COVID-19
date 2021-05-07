@@ -412,6 +412,21 @@ ggplot(ds, aes(fecha, ratio, colour = grupo)) +
 
 ###############################################################################
 ## Perú llegada vacunas
+## https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Per%C3%BA#Lotes_de_vacunas
+## https://datosmacro.expansion.com/demografia/estructura-poblacion/peru
+## 80 a mas:  0.565
+## 75 a mas:  1.066
+## 70 a mas:  1.754
+## 65 a mas:  2.728
+## 60 a mas:  3.927
+## 55 a mas:  5.387
+## 50 a mas:  7.112
+## 45 a mas:  9.088
+## 35 a mas: 11.304 
+## 30 a mas: 13.924
+## 25 a mas: 16.680 
+## 20 a mas: 19.349
+## 15 a mas: 21.854
 ###############################################################################
 
 library(ggplot2)
@@ -421,18 +436,27 @@ library(st4gi)
 laboratorios <- c("Sinopharm", "Pfizer", "AstraZeneca")
 nl <- length(laboratorios)
 
+sin.d <- c("02-07", "02-13")
+sin.c <- c(    0.3,     0.7)
+sin.d <- paste0("2021-", sin.d)
+
+pfi.d <- c("03-03", "03-10", "03-10", "03-17", "03-24", "03-31", "04-07", "04-14",
+           "04-21", "04-28", "05-06", "05-07", "05-13", "05-14")
+pfi.c <- c( .05031,   .1175,  .05031,  .05031,  .05031,  .04914,   .2007,   .2007,
+             .2007,   .2007,     .35,     .35,     .35,     .35)
+pfi.d <- paste0("2021-", pfi.d)
+
+ast.d <- c("04-18")
+ast.c <- c(   .276)
+ast.d <- paste0("2021-", ast.d)
+
 d <- data.frame(Fecha = c(rep(Sys.Date(), nl), rep("2021-02-06", nl),
-                          "2021-02-07", "2021-02-13", "2021-03-03", "2021-03-10",
-                          "2021-03-17", "2021-03-24", "2021-03-31", "2021-04-07",
-                          "2021-04-14", "2021-04-18", "2021-04-28"),
-                Cantidad = c(rep(0, nl * 2),
-                             .3, .7, .05, .167,
-                             .05, .05, .0414, .2,
-                             .2007, .276, .2007),
+                          sin.d, pfi.d, ast.d),
+                Cantidad = c(rep(0, nl * 2), sin.c, pfi.c, ast.c),
                 Laboratorio = c(rep(laboratorios, 2),
-                                "Sinopharm", "Sinopharm", "Pfizer", "Pfizer",
-                                "Pfizer", "Pfizer", "Pfizer", "Pfizer",
-                                "Pfizer", "AstraZeneca", "Pfizer"))
+                                rep("Sinopharm", length(sin.d)),
+                                rep("Pfizer", length(pfi.d)),
+                                rep("AstraZeneca", length(ast.d))))
 
 d$Fecha <- as.Date(d$Fecha, "%Y-%m-%d")
 
