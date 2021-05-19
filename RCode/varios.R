@@ -403,12 +403,12 @@ ds$ratio <- ds$pais / ds$base
 # Grafico
 
 ggplot(ds, aes(fecha, ratio, colour = grupo)) +
-  geom_point() +
+#  geom_point() +
   labs(x = "Fecha",
        y = "Cociente con respecto a la media 2019",
        name = "Grupo de Edad",
-       title = "Número de fallecidos diarios a nivel nacional según grupo de edad") + 
-  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 11))
+       title = "Fallecidos diarios a nivel nacional según grupo de edad") + 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 17), se = FALSE)
 
 ###############################################################################
 ## Perú llegada vacunas
@@ -441,9 +441,9 @@ sin.c <- c(    0.3,     0.7)
 sin.d <- paste0("2021-", sin.d)
 
 pfi.d <- c("03-03", "03-10", "03-10", "03-17", "03-24", "03-31", "04-07", "04-14",
-           "04-21", "04-28", "05-06", "05-07", "05-13", "05-14")
+           "04-21", "04-28", "05-06", "05-07", "05-13", "05-17", "05-19")
 pfi.c <- c( .05031,   .1175,  .05031,  .05031,  .05031,  .04914,   .2007,   .2007,
-             .2007,   .2007,     .35,     .35,     .35,     .35)
+             .2007,   .2007,     .35,     .35,      .7,     .35,     .35)
 pfi.d <- paste0("2021-", pfi.d)
 
 ast.d <- c("04-18")
@@ -460,6 +460,33 @@ d <- data.frame(Fecha = c(rep(Sys.Date(), nl), rep("2021-02-06", nl),
 
 d$Fecha <- as.Date(d$Fecha, "%Y-%m-%d")
 
+# Gráfico acumulado total
+
+temp <- data.frame(tapply(d$Cantidad, d$Fecha, sum))
+colnames(temp) <- "value"
+temp <- data.frame(apply(temp, 2, cumsum))
+temp$Fecha <- rownames(temp)
+temp$Fecha <- as.Date(temp$Fecha, "%Y-%m-%d")
+
+ggplot(temp, aes(Fecha, value)) +
+  geom_step() +
+  labs(y = "Cantidad acumulada en millones",
+       title = "Llegada de vacunas y cantidad requerida según grupo de edad") +
+  geom_hline(yintercept = 0.565 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 0.565 * 2,
+           label = "Mayores de 80", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 1.066 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 1.066 * 2,
+           label = "Mayores de 75", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 1.754 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 1.754 * 2,
+           label = "Mayores de 70", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 2.728 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 2.728 * 2,
+           label = "Mayores de 65", hjust = 0, vjust = -.5)
+
+# Gráfico acumulado por laboratorio
+
 temp <- data.frame(tapply(d$Cantidad, list(d$Fecha, d$Laboratorio), sum))
 temp[is.na(temp)] <- 0
 temp <- data.frame(apply(temp, 2, cumsum))
@@ -472,10 +499,17 @@ colnames(temp)[2] <- "Laboratorio"
 ggplot(temp, aes(Fecha, value, colour = Laboratorio)) +
   geom_step() +
   labs(y = "Cantidad acumulada en millones")
+  # annotate(geom = "text", x = as.Date("2021-02-18", "%Y-%m-%d"), y = 1.17,
+  #          label = "Efecto Bustamante / Willax / Beto Ortiz", size = 4.5,
+  #          color = "darkorange", hjust = 0, vjust = 1) +
+  # annotate(geom = "text", x = as.Date("2021-02-25", "%Y-%m-%d"), y = 0.97,
+  #          label = "Fujimorismo nunca más", size = 4.5,
+  #          color = "darkorange", hjust = 0, vjust = 1)
+
+# Gráfico totales
 
 temp <- docomp("sum", "Cantidad", "Laboratorio", dfr = d)
 
 ggplot(temp, aes(Laboratorio, Cantidad)) +
   labs(y = "Cantidad en millones") +
   geom_bar(stat = "identity", fill = "steelblue")
-
