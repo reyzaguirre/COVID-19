@@ -414,7 +414,6 @@ ggplot(ds, aes(fecha, ratio, colour = grupo)) +
 ## Perú llegada vacunas
 ## https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Per%C3%BA#Lotes_de_vacunas
 ## https://datosmacro.expansion.com/demografia/estructura-poblacion/peru
-## 55 a mas:  5.387
 ## 50 a mas:  7.112
 ## 45 a mas:  9.088
 ## 35 a mas: 11.304 
@@ -433,18 +432,18 @@ nl <- length(laboratorios)
 
 # Sinopharm
 
-sin.d <- c("02-07", "02-13")#, "06-02", "06-05")
-sin.c <- c(     .3,      .7)#,      .7,      .3)
+sin.d <- c("02-07", "02-13", "06-02", "06-05")
+sin.c <- c(     .3,      .7,      .7,      .3)
 sin.d <- paste0("2021-", sin.d)
 
 # Pfizer
 
 pfi.d <- c("03-03", "03-10", "03-10", "03-17", "03-24", "03-31", "04-07", "04-14",
            "04-21", "04-28", "05-06", "05-07", "05-13", "05-17", "05-19", "05-24",
-           "05-26")
+           "05-26", "05-31", "06-05")
 pfi.c <- c( .05031,   .1175,  .05031,  .05031,  .05031,  .04914,   .2007,   .2007,
              .2007,   .2007,     .35,     .35,      .7,  .39546,  .39546,  .39663,
-            .39546)
+            .39546,  .25155, 1.21563 - .25155)
 pfi.d <- paste0("2021-", pfi.d)
 
 # AstraZeneca
@@ -489,7 +488,10 @@ ggplot(temp, aes(Fecha, value)) +
            label = "Mayores de 65", hjust = 0, vjust = -.5) +
   geom_hline(yintercept = 3.927 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 3.927 * 2,
-           label = "Mayores de 60", hjust = 0, vjust = -.5)
+           label = "Mayores de 60", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 5.387 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 5.387 * 2,
+           label = "Mayores de 55", hjust = 0, vjust = -.5)
 
 
 # Gráfico acumulado por laboratorio
