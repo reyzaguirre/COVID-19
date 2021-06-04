@@ -21,12 +21,12 @@ library(httr)
 ```
 
 ```{r descargar, include = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS_30052021.xlsx"
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS.xlsx"
 GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
 ```{r datos, include = FALSE}
-full <- read.xlsx("temp.xlsx", sheet = 1, startRow = 4)
+full <- read.xlsx("temp.xlsx")
 full <- full[, c("PAIS.DOMICILIO", "DEPARTAMENTO.DOMICILIO", "PROVINCIA.DOMICILIO",
                  "DISTRITO.DOMICILIO", "FECHA", "AÑO")]
 colnames(full) <- c("pais", "departamento", "provincia", "distrito", "fecha", "ano")
