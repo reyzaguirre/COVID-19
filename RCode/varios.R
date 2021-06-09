@@ -440,10 +440,10 @@ sin.d <- paste0("2021-", sin.d)
 
 pfi.d <- c("03-03", "03-10", "03-10", "03-17", "03-24", "03-31", "04-07", "04-14",
            "04-21", "04-28", "05-06", "05-07", "05-13", "05-17", "05-19", "05-24",
-           "05-26", "05-31", "06-03")
+           "05-26", "05-31", "06-03", "06-04")
 pfi.c <- c( .05031,   .1175,  .05031,  .05031,  .05031,  .04914,   .2007,   .2007,
              .2007,   .2007,     .35,     .35,      .7,  .39546,  .39546,  .39663,
-            .39546,  .25155,  .71838)
+            .39546,  .25155,  .71838,  .24219)
 pfi.d <- paste0("2021-", pfi.d)
 
 # AstraZeneca
@@ -507,7 +507,8 @@ colnames(temp)[2] <- "Laboratorio"
 
 ggplot(temp, aes(Fecha, value, colour = Laboratorio)) +
   geom_step() +
-  labs(y = "Cantidad acumulada en millones")
+  labs(y = "Cantidad acumulada en millones",
+       title = "Llegada de vacunas por laboratorio")
   # annotate(geom = "text", x = as.Date("2021-02-18", "%Y-%m-%d"), y = 1.17,
   #          label = "Efecto Bustamante / Willax / Beto Ortiz", size = 4.5,
   #          color = "darkorange", hjust = 0, vjust = 1) +
@@ -520,6 +521,7 @@ ggplot(temp, aes(Fecha, value, colour = Laboratorio)) +
 temp <- docomp("sum", "Cantidad", "Laboratorio", dfr = d)
 
 ggplot(temp, aes(Laboratorio, Cantidad)) +
-  labs(y = "Cantidad en millones") +
+  labs(y = "Cantidad en millones",
+       title = "Total recibido por laboratorio") +
   geom_bar(stat = "identity", fill = "steelblue")
 
