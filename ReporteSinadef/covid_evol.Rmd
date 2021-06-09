@@ -21,15 +21,17 @@ library(httr)
 ```
 
 ```{r descargar, include = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS.xlsx"
-GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+# url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS.xlsx"
+# GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
 ```{r datos, include = FALSE}
-full <- read.xlsx("temp.xlsx")
-full <- full[, c("PAIS.DOMICILIO", "DEPARTAMENTO.DOMICILIO", "PROVINCIA.DOMICILIO",
+full <- read.xlsx("temp.xlsx", detectDates = TRUE)
+full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "PAIS.DOMICILIO",
+                 "DEPARTAMENTO.DOMICILIO", "PROVINCIA.DOMICILIO",
                  "DISTRITO.DOMICILIO", "FECHA", "AÑO")]
-colnames(full) <- c("pais", "departamento", "provincia", "distrito", "fecha", "ano")
+colnames(full) <- c("sexo", "edad", "tiempo.edad", "pais", "departamento",
+                    "provincia", "distrito", "fecha", "ano")
 
 # Totales por año
 
@@ -102,7 +104,146 @@ doplot(titulo = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia
        exceso = TRUE)
 ```
 
-## 3. Evolución del número de fallecidos diarios por departamento
+## 3. Exceso desagregado por sexo y edad
+
+```{r desagregado}
+# Limpiar solo edad en anos
+
+temp <- full[full$tiempo.edad == "AÑOS" & full$edad != "SIN REGISTRO", ]
+temp$edad <- as.numeric(temp$edad)
+
+# Limpiar solo hombres y mujeres
+
+temp <- temp[temp$sexo == "FEMENINO" | temp$sexo == "MASCULINO", ]
+
+# Grupos para mortalidad
+
+temp$grupo <- "80 y más"
+temp$grupo[temp$edad < 80] <- "75 a 79"
+temp$grupo[temp$edad < 75] <- "70 a 74"
+temp$grupo[temp$edad < 70] <- "65 a 69"
+temp$grupo[temp$edad < 65] <- "60 a 64"
+temp$grupo[temp$edad < 60] <- "55 a 59"
+temp$grupo[temp$edad < 55] <- "50 a 54"
+temp$grupo[temp$edad < 50] <- "45 a 49"
+temp$grupo[temp$edad < 45] <- "40 a 44"
+temp$grupo[temp$edad < 40] <- "35 a 39"
+temp$grupo[temp$edad < 35] <- "30 a 34"
+temp$grupo[temp$edad < 30] <- "25 a 29"
+temp$grupo[temp$edad < 25] <- "20 a 24"
+temp$grupo[temp$edad < 20] <- "0 a 19"
+
+temp$grupo <- factor(temp$grupo, ordered = TRUE,
+                     levels = c("0 a 19", "20 a 24", "25 a 29", "30 a 34",
+                                "35 a 39", "40 a 44", "45 a 49", "50 a 54",
+                                "55 a 59", "60 a 64", "65 a 69", "70 a 74",
+                                "75 a 79", "80 y más"))
+
+# Conteo por grupo y sexo
+
+temp <- docomp("count", "pais", c("sexo", "grupo", "fecha"), dfr = temp, method = 'fast')
+
+# Base
+
+lb <- temp[temp$fecha <= "2020-03-31", ]
+lb <- docomp("sum", "pais", c("sexo", "grupo"), dfr = lb, method = 'fast')
+lb$pais <- lb$pais / 91
+names(lb)[3] <- "base"
+
+# Diferencia
+
+temp <- merge(temp, lb)
+temp$dif <- temp$pais - temp$base
+
+# Total por grupo
+
+temp <- docomp("sum", "dif", c("sexo", "grupo"), dfr = temp, method = 'fast')
+
+# Totales
+
+temp$total <- c(1385933 + 1417319 + 1430083 + 1420257, 1401017, 1344048, 1233884, 1145477,
+                1034343, 903752, 788241, 658490, 532940, 415647, 311231, 229221, 235076,
+                1445122 + 1473968 + 1483727 + 1466289, 1438000, 1371191, 1251238, 1156915,
+                1038422, 899326, 774590, 634510, 501128, 379352, 271687, 186805, 166789)
+
+# Ratio
+
+temp$ratio <- temp$dif / temp$total
+
+# Grafico
+
+temp$grupo2 <- as.numeric(temp$grupo)
+
+ggplot(temp, aes(grupo, ratio, colour = sexo)) +
+  geom_point() +
+  geom_line(aes(grupo2)) +  
+  labs(x = "Edad (en años)",
+       y = "Proporción sobre el total poblacional",
+       name = "Sexo",
+       title = "Exceso de muerte por sexo y grupo de edad") +
+  theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+
+ef <- sum(temp$dif[temp$sexo == "FEMENINO"]) / 1000
+em <- sum(temp$dif[temp$sexo == "MASCULINO"]) / 1000
+mf <- ef / sum(temp$total[temp$sexo == "FEMENINO"]) * 100000
+mm <- em / sum(temp$total[temp$sexo == "MASCULINO"]) * 100000
+
+ef20 <- sum(temp$dif[temp$sexo == "FEMENINO" & temp$grupo2 > 1]) / 1000
+em20 <- sum(temp$dif[temp$sexo == "MASCULINO" & temp$grupo2 > 1]) / 1000
+mf20 <- ef20 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 1]) * 100000
+mm20 <- em20 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 1]) * 100000
+
+ef30 <- sum(temp$dif[temp$sexo == "FEMENINO" & temp$grupo2 > 3]) / 1000
+em30 <- sum(temp$dif[temp$sexo == "MASCULINO" & temp$grupo2 > 3]) / 1000
+mf30 <- ef30 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 3]) * 100000
+mm30 <- em30 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 3]) * 100000
+
+ef40 <- sum(temp$dif[temp$sexo == "FEMENINO" & temp$grupo2 > 5]) / 1000
+em40 <- sum(temp$dif[temp$sexo == "MASCULINO" & temp$grupo2 > 5]) / 1000
+mf40 <- ef40 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 5]) * 100000
+mm40 <- em40 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 5]) * 100000
+
+ef50 <- sum(temp$dif[temp$sexo == "FEMENINO" & temp$grupo2 > 7]) / 1000
+em50 <- sum(temp$dif[temp$sexo == "MASCULINO" & temp$grupo2 > 7]) / 1000
+mf50 <- ef50 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 7]) * 100000
+mm50 <- em50 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 7]) * 100000
+
+ef60 <- sum(temp$dif[temp$sexo == "FEMENINO" & temp$grupo2 > 9]) / 1000
+em60 <- sum(temp$dif[temp$sexo == "MASCULINO" & temp$grupo2 > 9]) / 1000
+mf60 <- ef60 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 9]) * 100000
+mm60 <- em60 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 9]) * 100000
+
+ef70 <- sum(temp$dif[temp$sexo == "FEMENINO" & temp$grupo2 > 11]) / 1000
+em70 <- sum(temp$dif[temp$sexo == "MASCULINO" & temp$grupo2 > 11]) / 1000
+mf70 <- ef70 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 11]) * 100000
+mm70 <- em70 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 11]) * 100000
+
+ef80 <- sum(temp$dif[temp$sexo == "FEMENINO" & temp$grupo2 > 13]) / 1000
+em80 <- sum(temp$dif[temp$sexo == "MASCULINO" & temp$grupo2 > 13]) / 1000
+mf80 <- ef80 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 13]) * 100000
+mm80 <- em80 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 13]) * 100000
+```
+
+| Sexo       | Grupo de edad | Exceso (en miles) | Mortalidad (%)    |
+|:-----------|:-------------:|:-----------------:|:-----------------:|
+| Femenino   | Todos         |`r round(ef)`      |`r round(mf, 2)`   |
+|            | 20 a más      |`r round(ef20)`    |`r round(mf20, 2)` |
+|            | 30 a más      |`r round(ef30)`    |`r round(mf30, 2)` |
+|            | 40 a más      |`r round(ef40)`    |`r round(mf40, 2)` |
+|            | 50 a más      |`r round(ef50)`    |`r round(mf50, 2)` |
+|            | 60 a más      |`r round(ef60)`    |`r round(mf60, 2)` |
+|            | 70 a más      |`r round(ef70)`    |`r round(mf70, 2)` |
+|            | 80 a más      |`r round(ef80)`    |`r round(mf80, 2)` |
+| Masculino  | Todos         |`r round(em)`      |`r round(mm, 2)`   |
+|            | 20 a más      |`r round(em20)`    |`r round(mm20, 2)` |
+|            | 30 a más      |`r round(em30)`    |`r round(mm30, 2)` |
+|            | 40 a más      |`r round(em40)`    |`r round(mm40, 2)` |
+|            | 50 a más      |`r round(em50)`    |`r round(mm50, 2)` |
+|            | 60 a más      |`r round(ef60)`    |`r round(mm60, 2)` |
+|            | 70 a más      |`r round(ef70)`    |`r round(mm70, 2)` |
+|            | 80 a más      |`r round(ef80)`    |`r round(mm80, 2)` |
+
+## 4. Evolución del número de fallecidos diarios por departamento
 
 ```{r departamento}
 ## Amazonas
@@ -254,7 +395,7 @@ doplot(titulo = "Fallecidos diarios en el departamento de Ucayali",
        poblacion = 589110)
 ```
 
-## 4. Evolución del número de fallecidos diarios por provincia (más de 140000 habitantes)
+## 5. Evolución del número de fallecidos diarios por provincia (más de 140000 habitantes)
 
 ```{r provincia}
 ## Andahuaylas
