@@ -30,21 +30,13 @@ full <- read.xlsx("temp.xlsx", detectDates = TRUE)
 full <- full[, c("SEXO", "EDAD", "TIEMPO.EDAD", "PAIS.DOMICILIO",
                  "DEPARTAMENTO.DOMICILIO", "PROVINCIA.DOMICILIO",
                  "DISTRITO.DOMICILIO", "FECHA", "AÑO")]
-colnames(full) <- c("sexo", "edad", "tiempo.edad", "pais", "departamento",
+colnames(full) <- c("sexo", "edad", "unidad", "pais", "departamento",
                     "provincia", "distrito", "fecha", "ano")
-
-# Totales por año
-
-total <- table(full$ano)
 
 # Formato fecha
 
 full$fecha <- as.Date(full$fecha, "%Y-%m-%d")
 full$ano <- as.numeric(full$ano)
-
-# A partir del 2020 y hasta un día antes
-
-full <- full[full$fecha >= "2020-01-01" & full$fecha < max(full$fecha), ]
 
 # Identificar último día
 
@@ -57,13 +49,16 @@ lista.meses <- c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
 
 ultimo.mes.texto <- lista.meses[ultimo.mes]
 
+# A partir del 2020 y hasta un día antes
+
+full <- full[full$fecha >= "2020-01-01" & full$fecha <= ultimo.fecha, ]
+
 # Eliminar otros paises
 
 full <- full[full$pais == "PERU", ]
 
 # Todas las fechas
 
-ultimo.fecha <- max(full$fecha)
 ff <- data.frame(fecha = seq(as.Date("2020-01-01", "%Y-%m-%d"), ultimo.fecha, by = "day"), pais = 0)
 ```
 
@@ -104,14 +99,52 @@ doplot(titulo = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia
        exceso = TRUE)
 ```
 
-## 3. Exceso desagregado por sexo y edad
+```{r edad}
+# Limpiar solo edad en años
 
-```{r desagregado}
-# Limpiar solo edad en anos
-
-temp <- full[full$tiempo.edad == "AÑOS" & full$edad != "SIN REGISTRO", ]
+temp <- full[full$unidad == "AÑOS" & full$edad != "SIN REGISTRO", ]
 temp$edad <- as.numeric(temp$edad)
 
+# Grupos de edad
+
+temp$grupo <- "80 y más"
+temp$grupo[temp$edad < 80] <- "70 a 79"
+temp$grupo[temp$edad < 70] <- "60 a 69"
+temp$grupo[temp$edad < 60] <- "50 a 59"
+temp$grupo[temp$edad < 50] <- "40 a 49"
+temp$grupo[temp$edad < 40] <- "30 a 39"
+temp$grupo[temp$edad < 30] <- "0 a 29"
+
+# Referencia diaria enero-marzo 2020
+
+tt <- table(temp[temp$fecha <= "2020-03-31", "grupo"]) / 91
+tt <- data.frame(tt)
+colnames(tt) <- c("grupo", "base")
+
+# Conteo diario
+
+ds <- docomp("count", "pais", c("grupo", "fecha"), dfr = temp, method = 'fast')
+
+# Calcular cociente
+
+ds <- merge(ds, tt)
+ds$ratio <- ds$pais / ds$base
+
+# Grafico
+
+ggplot(ds, aes(fecha, ratio, colour = grupo)) +
+  labs(x = "Fecha",
+       y = "Cociente con respecto a la media enero-marzo 2020",
+       name = "Grupo de Edad",
+       title = "Fallecidos diarios a nivel nacional según grupo de edad") + 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 17), se = FALSE)
+
+```
+
+
+## 3. Exceso de muerte desagregado por sexo y edad
+
+```{r desagregado}
 # Limpiar solo hombres y mujeres
 
 temp <- temp[temp$sexo == "FEMENINO" | temp$sexo == "MASCULINO", ]
@@ -176,12 +209,14 @@ temp$grupo2 <- as.numeric(temp$grupo)
 
 ggplot(temp, aes(grupo, ratio, colour = sexo)) +
   geom_point() +
-  geom_line(aes(grupo2)) +  
+  geom_line(aes(grupo2)) +
   labs(x = "Edad (en años)",
        y = "Proporción sobre el total poblacional",
        name = "Sexo",
        title = "Exceso de muerte por sexo y grupo de edad") +
   theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+
+## Calculos de exceso y mortalida
 
 ef <- sum(temp$dif[temp$sexo == "FEMENINO"]) / 1000
 em <- sum(temp$dif[temp$sexo == "MASCULINO"]) / 1000
@@ -224,6 +259,8 @@ mf80 <- ef80 / sum(temp$total[temp$sexo == "FEMENINO" & temp$grupo2 > 13]) * 100
 mm80 <- em80 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 13]) * 100000
 ```
 
+#### Exceso de muerte y mortalidad por sexo y grupos de edad
+
 | Sexo       | Grupo de edad | Exceso (en miles) | Mortalidad (%)    |
 |:-----------|:-------------:|:-----------------:|:-----------------:|
 | Femenino   | Todos         |`r round(ef)`      |`r round(mf, 2)`   |
@@ -243,7 +280,7 @@ mm80 <- em80 / sum(temp$total[temp$sexo == "MASCULINO" & temp$grupo2 > 13]) * 10
 |            | 70 a más      |`r round(ef70)`    |`r round(mm70, 2)` |
 |            | 80 a más      |`r round(ef80)`    |`r round(mm80, 2)` |
 
-## 4. Evolución del número de fallecidos diarios por departamento
+## 3. Evolución del número de fallecidos diarios por departamento
 
 ```{r departamento}
 ## Amazonas
@@ -395,7 +432,7 @@ doplot(titulo = "Fallecidos diarios en el departamento de Ucayali",
        poblacion = 589110)
 ```
 
-## 5. Evolución del número de fallecidos diarios por provincia (más de 140000 habitantes)
+## 4. Evolución del número de fallecidos diarios por provincia (más de 140000 habitantes)
 
 ```{r provincia}
 ## Andahuaylas
