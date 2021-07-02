@@ -16,7 +16,7 @@ options(digits = 4)
 
 library(ggplot2)
 library(st4gi)
-library(openxlsx) 
+library(openxlsx)
 library(httr)
 ```
 
@@ -130,7 +130,7 @@ ds <- docomp("count", "pais", c("grupo", "fecha"), dfr = temp, method = 'fast')
 ds <- merge(ds, tt)
 ds$ratio <- ds$pais / ds$base
 
-# Grafico
+# Gráfico
 
 ggplot(ds, aes(fecha, ratio, colour = grupo)) +
   labs(x = "Fecha",
@@ -203,7 +203,7 @@ temp$total <- c(1385933 + 1417319 + 1430083 + 1420257, 1401017, 1344048, 1233884
 
 temp$ratio <- temp$dif / temp$total
 
-# Grafico
+# Gráfico
 
 temp$grupo2 <- as.numeric(temp$grupo)
 
@@ -216,7 +216,7 @@ ggplot(temp, aes(grupo, ratio, colour = sexo)) +
        title = "Exceso de muerte por sexo y grupo de edad") +
   theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
 
-## Calculos de exceso y mortalida
+## Cálculos de exceso y mortalidad
 
 ef <- sum(temp$dif[temp$sexo == "FEMENINO"]) / 1000
 em <- sum(temp$dif[temp$sexo == "MASCULINO"]) / 1000
