@@ -138,7 +138,6 @@ ggplot(ds, aes(fecha, ratio, colour = grupo)) +
        name = "Grupo de Edad",
        title = "Fallecidos diarios a nivel nacional según grupo de edad") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 17), se = FALSE)
-
 ```
 
 
