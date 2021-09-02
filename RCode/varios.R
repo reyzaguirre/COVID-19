@@ -339,11 +339,12 @@ ggplot(d, aes(año, y, colour = mes)) +
 ## Perú llegada vacunas
 ## https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Per%C3%BA#Lotes_de_vacunas
 ## https://datosmacro.expansion.com/demografia/estructura-poblacion/peru
-## 35 a mas: 11.304 
-## 30 a mas: 13.924
-## 25 a mas: 16.680 
-## 20 a mas: 19.349
-## 15 a mas: 21.854
+## 25 a mas: 19.134 
+## 20 a mas: 21.802
+## 15 a mas: 24.307
+## 10 a mas: 27.027
+##  5 a mas: 29.707
+##  0 a mas: 32.517
 ###############################################################################
 
 library(ggplot2)
@@ -355,8 +356,10 @@ nl <- length(laboratorios)
 
 # Sinopharm
 
-sin.d <- c("02-07", "02-13", "06-02", "06-05", "07-10", "07-11")
-sin.c <- c(     .3,      .7,      .7,      .3,   .6144,   .3856)
+sin.d <- c("02-07", "02-13", "06-02", "06-05", "07-10", "07-11", "08-01", "08-15",
+           "08-21", "08-22", "08-29")#, "09-05")
+sin.c <- c( .30000,  .70000,  .70000,  .30000,  .61440,  .38560, 1.00000, 1.00000,
+            .61440,  .38560, 1.00000)#, 4.00000)
 sin.d <- paste0("2021-", sin.d)
 
 # Pfizer
@@ -364,17 +367,19 @@ sin.d <- paste0("2021-", sin.d)
 pfi.d <- c("03-03", "03-10", "03-10", "03-17", "03-24", "03-31", "04-07", "04-14",
            "04-21", "04-28", "05-06", "05-07", "05-13", "05-17", "05-19", "05-24",
            "05-26", "05-31", "06-03", "06-04", "06-10", "06-17", "06-24", "06-29",
-           "07-01", "07-07")
-pfi.c <- c( .05031,   .1175,  .05031,  .05031,  .05031,  .04914,   .2007,   .2007,
-             .2007,   .2007,     .35,     .35,      .7,  .39546,  .39546,  .39663,
-            .39546,  .25155,  .71838,  .24219,  .49608,  .49608,  .49725,   1.002,
-            .49725,    .998)
+           "07-01", "07-07", "07-15", "07-22", "07-26", "07-30", "08-05", "08-12",
+           "08-18", "08-19", "08-20", "08-26")#, "09-02", "09-06", "09-13")
+pfi.c <- c( .05031,  .11750,  .05031,  .05031,  .05031,  .04914,  .20070,  .20070,
+            .20070,  .20070,  .35000,  .35000,  .70000,  .39546,  .39546,  .39663,
+            .39546,  .25155,  .71838,  .24219,  .49608,  .49608,  .49725, 1.00200,
+            .49725,  .99800,  .28197,  .88686,  .93600,  .19656,  .47502,  .56979,
+            .22230,  .22230,  .59436,  .54054)#,  .66000,  .74000,  .74000)
 pfi.d <- paste0("2021-", pfi.d)
 
 # AstraZeneca
 
-ast.d <- c("04-18", "05-29")
-ast.c <- c(   .276,   .5112)
+ast.d <- c("04-18", "05-29", "08-04")
+ast.c <- c(   .276,   .5112,  .10176)
 ast.d <- paste0("2021-", ast.d)
 
 d <- data.frame(Fecha = c(rep(Sys.Date(), nl), rep("2021-02-06", nl),
@@ -405,16 +410,16 @@ ggplot(temp, aes(Fecha, value)) +
   geom_hline(yintercept = 1.066 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 1.066 * 2,
            label = "Mayores de 75", hjust = 0, vjust = -.5) +
-  geom_hline(yintercept = 1.754 * 2, linetype = 2, size = 1) +
+  geom_hline(yintercept = 1.755 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 1.754 * 2,
            label = "Mayores de 70", hjust = 0, vjust = -.5) +
-  geom_hline(yintercept = 2.728 * 2, linetype = 2, size = 1) +
+  geom_hline(yintercept = 2.729 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 2.728 * 2,
            label = "Mayores de 65", hjust = 0, vjust = -.5) +
   geom_hline(yintercept = 3.927 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 3.927 * 2,
            label = "Mayores de 60", hjust = 0, vjust = -.5) +
-  geom_hline(yintercept = 5.387 * 2, linetype = 2, size = 1) +
+  geom_hline(yintercept = 5.386 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 5.387 * 2,
            label = "Mayores de 55", hjust = 0, vjust = -.5) +
   geom_hline(yintercept = 7.112 * 2, linetype = 2, size = 1) +
@@ -422,7 +427,16 @@ ggplot(temp, aes(Fecha, value)) +
            label = "Mayores de 50", hjust = 0, vjust = -.5) +
   geom_hline(yintercept = 9.088 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 9.088 * 2,
-           label = "Mayores de 45", hjust = 0, vjust = -.5)
+           label = "Mayores de 45", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 11.31 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 11.31 * 2,
+           label = "Mayores de 40", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 13.758 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 13.758 * 2,
+           label = "Mayores de 35", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 16.379 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 16.379 * 2,
+           label = "Mayores de 30", hjust = 0, vjust = -.5)
 
 # Gráfico acumulado por laboratorio
 
