@@ -339,7 +339,6 @@ ggplot(d, aes(año, y, colour = mes)) +
 ## Perú llegada vacunas
 ## https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Per%C3%BA#Lotes_de_vacunas
 ## https://datosmacro.expansion.com/demografia/estructura-poblacion/peru
-## 25 a mas: 19.134 
 ## 20 a mas: 21.802
 ## 15 a mas: 24.307
 ## 10 a mas: 27.027
@@ -357,9 +356,9 @@ nl <- length(laboratorios)
 # Sinopharm
 
 sin.d <- c("02-07", "02-13", "06-02", "06-05", "07-10", "07-11", "08-01", "08-15",
-           "08-21", "08-22", "08-29", "09-04", "09-10", "09-11")
+           "08-21", "08-22", "08-29", "09-04", "09-10", "09-11", "09-12")
 sin.c <- c( .30000,  .70000,  .70000,  .30000,  .61440,  .38560, 1.00000, 1.00000,
-            .61440,  .38560, 1.00000, 2.00000, 2.86250, 3.34260)
+            .61440,  .38560, 1.00000, 2.00000, 2.86250, 3.34260, 0.79490)
 sin.d <- paste0("2021-", sin.d)
 
 # Pfizer
@@ -368,18 +367,18 @@ pfi.d <- c("03-03", "03-10", "03-10", "03-17", "03-24", "03-31", "04-07", "04-14
            "04-21", "04-28", "05-06", "05-07", "05-13", "05-17", "05-19", "05-24",
            "05-26", "05-31", "06-03", "06-04", "06-10", "06-17", "06-24", "06-29",
            "07-01", "07-07", "07-15", "07-22", "07-26", "07-30", "08-05", "08-12",
-           "08-18", "08-19", "08-20", "08-26", "09-03", "09-06")#, "09-13")
+           "08-18", "08-19", "08-20", "08-26", "09-03", "09-06", "09-13")
 pfi.c <- c( .05031,  .11750,  .05031,  .05031,  .05031,  .04914,  .20070,  .20070,
             .20070,  .20070,  .35000,  .35000,  .70000,  .39546,  .39546,  .39663,
             .39546,  .25155,  .71838,  .24219,  .49608,  .49608,  .49725, 1.00200,
             .49725,  .99800,  .28197,  .88686,  .93600,  .19656,  .47502,  .56979,
-            .22230,  .22230,  .59436,  .54054,  .66222,  .74880)#,  .74000)
+            .22230,  .22230,  .59436,  .54054,  .66222,  .74880,  .74880)
 pfi.d <- paste0("2021-", pfi.d)
 
 # AstraZeneca
 
-ast.d <- c("04-18", "05-29", "08-04", "09-02", "09-08")
-ast.c <- c( .27600,  .51120,  .10176,  .03510,  .36240)
+ast.d <- c("04-18", "05-29", "08-04", "09-02", "09-08", "09-13", "09-14")
+ast.c <- c( .27600,  .51120,  .10176,  .03510,  .36240,  .33600,  .14640)
 ast.d <- paste0("2021-", ast.d)
 
 d <- data.frame(Fecha = c(rep(Sys.Date(), nl), rep("2021-02-06", nl),
@@ -405,6 +404,7 @@ ggplot(temp, aes(Fecha, value)) +
   labs(y = "Cantidad acumulada en millones",
        title = "Llegada de vacunas y cantidad requerida según grupo de edad") +
   geom_hline(yintercept = 0.565 * 2, linetype = 2, size = 1) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0), add = c(0, 1))) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 0.565 * 2,
            label = "Mayores de 80", hjust = 0, vjust = -.5) +
   geom_hline(yintercept = 1.066 * 2, linetype = 2, size = 1) +
@@ -436,7 +436,10 @@ ggplot(temp, aes(Fecha, value)) +
            label = "Mayores de 35", hjust = 0, vjust = -.5) +
   geom_hline(yintercept = 16.379 * 2, linetype = 2, size = 1) +
   annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 16.379 * 2,
-           label = "Mayores de 30", hjust = 0, vjust = -.5)
+           label = "Mayores de 30", hjust = 0, vjust = -.5) +
+  geom_hline(yintercept = 19.134 * 2, linetype = 2, size = 1) +
+  annotate(geom = "text", x = as.Date("2021-02-06", "%Y-%m-%d"), y = 19.134 * 2,
+           label = "Mayores de 25", hjust = 0, vjust = -.5)
 
 # Gráfico acumulado por laboratorio
 
@@ -451,6 +454,7 @@ colnames(temp)[2] <- "Laboratorio"
 
 ggplot(temp, aes(Fecha, value, colour = Laboratorio)) +
   geom_step() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0), add = c(0, 1))) +
   labs(y = "Cantidad acumulada en millones",
        title = "Llegada de vacunas por laboratorio")
   # annotate(geom = "text", x = as.Date("2021-02-18", "%Y-%m-%d"), y = 1.17,
