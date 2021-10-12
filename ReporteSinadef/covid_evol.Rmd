@@ -95,7 +95,7 @@ doplot <- function(titulo, subtitulo = NULL, k = 20, poblacion, exceso = FALSE) 
 ```{r peru}
 temp <- full
 doplot(titulo = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia, "de", ultimo.mes.texto),
-       poblacion = 32625948, k = 21, exceso = TRUE)
+       poblacion = 32625948, k = 22, exceso = TRUE)
 ```
 
 ```{r edad}
@@ -363,7 +363,7 @@ doplot(titulo = "Fallecidos diarios en el departamento de Lambayeque",
 
 temp <- full[full$departamento %in% c("CALLAO", "LIMA"), ]
 doplot(titulo = "Fallecidos diarios en el departamento de Lima",
-       poblacion = (10628470 + 1129854), k = 21, exceso = TRUE)
+       poblacion = (10628470 + 1129854), k = 22, exceso = TRUE)
 
 ## Loreto
 
