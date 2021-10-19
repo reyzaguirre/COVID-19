@@ -18,11 +18,12 @@ library(ggplot2)
 library(st4gi)
 library(openxlsx)
 library(httr)
+library(plotly)
 ```
 
 ```{r descargar, include = FALSE}
-url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS.xlsx"
-GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+# url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS.xlsx"
+# GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
 ```{r datos, include = FALSE}
@@ -94,8 +95,9 @@ doplot <- function(titulo, subtitulo = NULL, k = 20, poblacion, exceso = FALSE) 
 
 ```{r peru}
 temp <- full
-doplot(titulo = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia, "de", ultimo.mes.texto),
-       poblacion = 32625948, k = 22, exceso = TRUE)
+p <- doplot(titulo = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia, "de", ultimo.mes.texto),
+            poblacion = 32625948, k = 22, exceso = TRUE)
+ggplotly(p)
 ```
 
 ```{r edad}
