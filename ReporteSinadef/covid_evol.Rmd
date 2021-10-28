@@ -22,8 +22,8 @@ library(plotly)
 ```
 
 ```{r descargar, include = FALSE}
-# url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS.xlsx"
-# GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
+url.sinadef <- "https://cloud.minsa.gob.pe/s/NctBnHXDnocgWAg/download?path=%2F&files=SINADEF_DATOS_ABIERTOS.xlsx"
+GET(url.sinadef, write_disk("temp.xlsx", overwrite = TRUE))
 ```
 
 ```{r datos, include = FALSE}
@@ -97,7 +97,7 @@ doplot <- function(titulo, subtitulo = NULL, k = 20, poblacion, exceso = FALSE) 
 temp <- full
 p <- doplot(titulo = paste("Fallecidos diarios a nivel nacional hasta el", ultimo.dia, "de", ultimo.mes.texto),
             poblacion = 32625948, k = 22, exceso = TRUE)
-ggplotly(p)
+p
 ```
 
 ```{r edad}
@@ -133,12 +133,13 @@ ds$ratio <- ds$pais / ds$base
 
 # Gráfico
 
-ggplot(ds, aes(fecha, ratio, colour = grupo)) +
+p <- ggplot(ds, aes(fecha, ratio, colour = grupo)) +
   labs(x = "Fecha",
        y = "Cociente con respecto a la media enero-marzo 2020",
        name = "Grupo de Edad",
        title = "Fallecidos diarios a nivel nacional según grupo de edad") + 
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = 'cr', k = 17), se = FALSE)
+ggplotly(p)
 ```
 
 
@@ -207,7 +208,7 @@ temp$ratio <- temp$dif / temp$total
 
 temp$grupo2 <- as.numeric(temp$grupo)
 
-ggplot(temp, aes(grupo, ratio, colour = sexo)) +
+p <- ggplot(temp, aes(grupo, ratio, colour = sexo)) +
   geom_point() +
   geom_line(aes(grupo2)) +
   labs(x = "Edad (en años)",
@@ -215,6 +216,7 @@ ggplot(temp, aes(grupo, ratio, colour = sexo)) +
        name = "Sexo",
        title = "Exceso de muerte por sexo y grupo de edad") +
   theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+ggplotly(p)
 
 ## Cálculos de exceso y mortalidad
 
